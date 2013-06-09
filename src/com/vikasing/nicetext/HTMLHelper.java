@@ -36,21 +36,18 @@ public class HTMLHelper {
 			Element newBodyElement = removeScriptsAndStyles(bodyElement);
 			Set<Element> refElements = removeFat(newBodyElement);
 			Elements mainElements = new Elements();
-			/*for (Element element : allElements) {
-				if (element.isBlock() && element.hasText()) {
-					mainElements.add(element);
-				}
-			}*/
 			mainElements.addAll(refElements);
-			Elements elements = calculateBlockSizeRatios(mainElements);
-			mainElements.clear();
-			for (Element element : elements) {
-				for (Element innerElement : element.children()) {
-					if (innerElement.isBlock() && innerElement.hasText() && innerElement.text().length()>SENT_T) {
-						mainElements.add(innerElement);
+			calculateBlockSizeRatios(mainElements);
+			//mainElements.clear();
+			for (Element element : mainElements) {
+				if (element!=null) {
+					for (Element innerElement : element.children()) {
+						if (innerElement.isBlock() && innerElement.hasText() && innerElement.text().length()>SENT_T) {
+							System.out.println(innerElement.text());
+							//mainElements.add(innerElement);
+						}
 					}
 				}
-
 			}
 			Elements elements2 = calculateBlockSizeRatios(mainElements);
 			for (Element element2 : elements2) {
@@ -62,69 +59,23 @@ public class HTMLHelper {
 	}
 	
 	public static Elements calculateBlockSizeRatios(Elements mainElements){
-		Elements elementsOfInterest = new Elements();
 		Map<Integer, Double> sizeMap = calculateSize(mainElements);
+		double maxElement = findMax(sizeMap.values());
 		int sizeOfMap = sizeMap.size();
 		List<Integer> elemIndexForRemoval = new ArrayList<Integer>();
-		double maxElement = findMax(sizeMap.values());
 		Set<Integer> keySet = sizeMap.keySet();
 		for (Integer key : keySet) {
 			sizeMap.put(key, sizeMap.get(key)/maxElement);
 		}
-		for (int i =0; i<sizeOfMap-1;i++) {
- 
-			//else if (ratio>1/RATIO_T) {
-				//sizeMap.remove(i+1);
-				//mainElements.remove(i+1);
+		for (int i =0; i<sizeOfMap;i++) { 
+			if (sizeMap.get(i)<RATIO_T) {
 				elemIndexForRemoval.add(i);
-			//}
-		}
-		for (Integer index : elemIndexForRemoval) {
-			sizeMap.remove(index);
-		}
-		
-		/*Object[] mainElementsArray = mainElements.toArray();
-		for (int j = 0;j<mainElementsArray.length-1;j++) {
-			if (secondElSize>0 && firstElSize>0){ 
-				
-				double ratio = 0.0;
-				
-				if (mainTextLen==0.0) {
-					ratio = firstElSize/secondElSize;
-				}
-				else {
-					ratio = mainTextLen/secondElSize;
-				}				
-				if (ratio<1/RATIO_T && ratio>RATIO_T) {
-					elementsOfInterest.add(fElement);
-					elementsOfInterest.add(sElement);										
-				}
-				else if (ratio<RATIO_T) {
-					elementsOfInterest.add(sElement);
-				}
-				else if (ratio>=1/RATIO_T) {
-					elementsOfInterest.add(fElement);
-				}
-				if (mainTextLen<Math.max(firstElSize,secondElSize)) {
-					mainTextLen = Math.max(firstElSize,secondElSize);
-					fElement = sElement;
-					sElement = (Element) mainElementsArray[j+1];
-					firstElSize = fElement.toString().length();
-					secondElSize = sElement.toString().length();
-				}
-				else {
-					sElement =(Element) mainElementsArray[j+1];
-					secondElSize = sElement.toString().length();
-				}
 			}
-			else {
-				fElement = (Element) mainElementsArray[j];
-				sElement = (Element) mainElementsArray[j+1];
-				firstElSize = fElement.toString().length();
-				secondElSize = sElement.toString().length();
-			}
-		}*/
-		return elementsOfInterest;
+		}
+		for (int index : elemIndexForRemoval) {
+			mainElements.set(index, null);
+		}
+		return mainElements;
 	}
 	private static double findMax(Collection<Double> values) {
 		double max = 0;
