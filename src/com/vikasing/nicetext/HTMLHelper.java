@@ -6,6 +6,7 @@ package com.vikasing.nicetext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,7 +17,9 @@ import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.jsoup.select.NodeVisitor;
 
 /**
  * @author vikasing
@@ -24,8 +27,8 @@ import org.jsoup.select.Elements;
  */
 public class HTMLHelper {
 	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
-    private static final Pattern NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span");
-	private static final int SENT_T = 100;
+    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span");
+	private static final int SENT_T = 50;
 	private static final int WORDS_T = 15;
 	private static final double RATIO_T = 0.15; 
 	
@@ -33,31 +36,39 @@ public class HTMLHelper {
 		try {
 			Document document = Jsoup.connect(url).timeout(60000).userAgent(USER_AGENT).get();
 			Element bodyElement = document.body(); 
-			Element newBodyElement = removeScriptsAndStyles(bodyElement);
-			Set<Element> refElements = removeFat(newBodyElement);
+
 			Elements mainElements = new Elements();
+			Set<Element> refElements = flattenDOM(bodyElement);
 			mainElements.addAll(refElements);
 			calculateBlockSizeRatios(mainElements);
-			//mainElements.clear();
 			for (Element element : mainElements) {
-				if (element!=null) {
-					for (Element innerElement : element.children()) {
-						if (innerElement.isBlock() && innerElement.hasText() && innerElement.text().length()>SENT_T) {
-							System.out.println(innerElement.text());
-							//mainElements.add(innerElement);
-						}
-					}
+				if (element!=null) {					
+					System.out.println(element.text());
 				}
-			}
-			Elements elements2 = calculateBlockSizeRatios(mainElements);
-			for (Element element2 : elements2) {
-				System.out.println(element2.text());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	private static Set<Element> flattenDOM(Element bodyElement) {
+		final Set<Element> flatDOM = new LinkedHashSet<Element>();
+		bodyElement.traverse(new NodeVisitor() {
+		    public void head(Node node, int depth) {
+		    	if (node instanceof Element) {
+					Element innerElement = (Element)node;
+					if ((innerElement.isBlock() || POSSIBLE_TEXT_NODES.matcher(innerElement.tagName()).matches())&& innerElement.ownText().length()>0) {
+						flatDOM.add(innerElement);
+					}
+				}
+		    }
+		    public void tail(Node node, int depth) {
+		        //System.out.println("Exiting tag: " + node.nodeName());
+		    }
+		});		
+		return flatDOM;
+	}
+
 	public static Elements calculateBlockSizeRatios(Elements mainElements){
 		Map<Integer, Double> sizeMap = calculateSize(mainElements);
 		double maxElement = findMax(sizeMap.values());
@@ -94,11 +105,11 @@ public class HTMLHelper {
 		}
 		return sizeMap;
 	}
-    public static Set<Element> removeFat(Element e) {
+	private  static Set<Element> removeFat(Element e) {
         Set<Element> nodes = new LinkedHashSet<Element>(64);
         Elements allBodyElements = e.children();
         for (Element el : allBodyElements) {
-            if (NODES.matcher(el.tagName()).matches()) {
+            if (POSSIBLE_TEXT_NODES.matcher(el.tagName()).matches()) {
             	if (el.hasText()) {
             		nodes.add(el);
 				}                
@@ -125,6 +136,6 @@ public class HTMLHelper {
         return doc;
     }
 	public static void main(String[] args) {
-		getHTML("http://www.firstpost.com/fwire/monsoon-showers-cannot-hide-modis-grin-854383.html?utm_source=fwire&utm_medium=hp");
+		getHTML("http://alumniconnect.wordpress.com/2013/06/04/a-monk-who-didnt-care-for-ferrari-teaching-to-serve-society/");
 	}
 }
