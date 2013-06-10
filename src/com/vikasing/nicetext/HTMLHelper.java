@@ -27,7 +27,7 @@ import org.jsoup.select.NodeVisitor;
  */
 public class HTMLHelper {
 	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
-    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span");
+    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp");
 	private static final int SENT_T = 50;
 	private static final int WORDS_T = 15;
 	private static final double RATIO_T = 0.15; 
@@ -136,6 +136,6 @@ public class HTMLHelper {
         return doc;
     }
 	public static void main(String[] args) {
-		getHTML("http://alumniconnect.wordpress.com/2013/06/04/a-monk-who-didnt-care-for-ferrari-teaching-to-serve-society/");
+		getHTML("http://timesofindia.indiatimes.com/india/Advani-refuses-to-withdraw-resignation-Modi-dials-him/articleshow/20524057.cms");
 	}
 }
