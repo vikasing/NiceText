@@ -31,30 +31,44 @@ public class HTMLHelper {
 	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
     private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp");
     private static final Pattern ARTICLE_NODES = Pattern.compile("article|section|tmp");
-    private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|main|contententry|page|post|text|blog|story|mainContent");
+    private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|contententry|page|post|text|blog|story|mainContent|container|content");
 
 	private static final int SENT_T = 70;
-	private static final int WORDS_T = 5;
+	private static final int WORDS_T = 50;
 	private static final double RATIO_T = 0.15; 
 	private NiceTextType niceTextType;
 	
+	public HTMLHelper(){
+		niceTextType = new NiceTextType();
+	}
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();		
-		htmlHelper.getHTML("http://my.opera.com/chooseopera/blog/2013/06/11/introducing-opera-mail");
+		htmlHelper.getHTML("http://www.mediabistro.com/alltwitter/linguistics-professor-finds-average-word-length-in-a-tweet-is-longer-than-in-shakespeare_b15314");
 	}
 	
 	public void getHTML(String url){
 		try {
 			Document document = Jsoup.connect(url).timeout(60000).userAgent(USER_AGENT).get();
 			//Document document = Jsoup.parse(new File("art.html"), "UTF-8");
-			niceTextType = new NiceTextType();
+			
 			Element bodyElement = document.body();
 			removeFat(bodyElement);
+			Elements bodyElements = bodyElement.getAllElements();
 			articleFinder(niceTextType,bodyElement);
+			niceTextType.setLargestHTMLBlock(findLargestBlock(bodyElements));
+			System.out.println(niceTextType.getLargestHTMLBlock().text());
+			System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+
 			niceTextType.setMainElements(new Elements(flattenDOM(bodyElement)));
-			System.out.println("Art "+ niceTextType.getArticle());
-			calculateBlockSizeRatios(niceTextType);
-			System.out.println(niceTextType.getLargestTextBlock());
+			//System.out.println("Art "+ niceTextType.getArticleHTML());
+			Elements mainElements = calculateBlockSizeRatios(new Elements(flattenDOM(niceTextType.getLargestHTMLBlock())));
+			//Elements mainElements =calculateBlockSizeRatios(bodyElements);
+			//niceTextType.setMainElements(mainElements);
+			for (Element element : mainElements) {
+				if (element!=null && (element.isBlock() || POSSIBLE_TEXT_NODES.matcher(element.tagName()).matches())) {
+					System.out.println(element.text());
+				}
+			}
 			System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
 			StringBuffer allText = new StringBuffer();
 			StringBuffer allHTML = new StringBuffer();
@@ -64,8 +78,8 @@ public class HTMLHelper {
 					allHTML.append(element.toString());
 				}
 			}
-			System.out.println(allText.toString());
-			System.out.println(allHTML);
+			//System.out.println(allText.toString());
+			//System.out.println(allHTML);
 			niceTextType.setAllText(allText.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -90,9 +104,16 @@ public class HTMLHelper {
 		});		
 		return flatDOM;
 	}
-
-	public NiceTextType calculateBlockSizeRatios(NiceTextType niceTextType){
-		Elements mainElements = niceTextType.getMainElements();
+	private Element findLargestBlock(Elements bodyElements){
+		Map<Integer, Double> sizeMap = calculateSize(bodyElements);
+		Map<Integer, Double> k = findMax(sizeMap.values());
+		int maxIndex = 0;
+		for (Integer j : k.keySet()) {
+			maxIndex = j;
+		}
+		return bodyElements.get(maxIndex);
+	}
+	public Elements calculateBlockSizeRatios(Elements mainElements){
 		Map<Integer, Double> sizeMap = calculateSize(mainElements);
 		Map<Integer, Double> k = findMax(sizeMap.values());
 		int sizeOfMap = sizeMap.size();
@@ -113,10 +134,7 @@ public class HTMLHelper {
 		for (int index : elemIndexForRemoval) {
 			mainElements.set(index, null);
 		}
-		niceTextType.setMainElements(mainElements);
-		niceTextType.setLargestHTMLBlock(mainElements.get(maxIndex).toString());
-		niceTextType.setLargestTextBlock(mainElements.get(maxIndex).text());
-		return niceTextType;
+		return mainElements;
 	}
 	private Map<Integer, Double> findMax(Collection<Double> values) {
 		double max = 0;
@@ -178,18 +196,12 @@ public class HTMLHelper {
     
     private void articleFinder(NiceTextType niceTextType,Element bodyElement){
     	for (Element el : bodyElement.getAllElements()) {
-            if (ARTICLE_NODES.matcher(el.tagName()).matches()) {
+            if (ARTICLE_NODES.matcher(el.tagName()).matches()||MAIN_BLOCK_CLASSES_IDS.matcher(el.className()).matches() || MAIN_BLOCK_CLASSES_IDS.matcher(el.attr("id")).matches()) {
             	if (el.hasText()) {
-            		niceTextType.setArticle(el.text());
+            		niceTextType.setArticleHTML(el);
             		break;
 				}                
             }
-            else if (MAIN_BLOCK_CLASSES_IDS.matcher(el.className()).matches() || MAIN_BLOCK_CLASSES_IDS.matcher(el.attr("id")).matches()) {
-            	if (el.hasText()) {
-            		niceTextType.setArticle(el.text());
-            		break;
-				} 
-			}
         }
     }
 }
