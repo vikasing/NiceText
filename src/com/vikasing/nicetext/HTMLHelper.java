@@ -3,15 +3,11 @@
  */
 package com.vikasing.nicetext;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -31,11 +27,11 @@ public class HTMLHelper {
 	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
     private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp");
     private static final Pattern ARTICLE_NODES = Pattern.compile("article|section|tmp");
-    private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|contententry|page|post|text|blog|story|mainContent|container|content");
-
-	private static final int SENT_T = 70;
-	private static final int WORDS_T = 50;
-	private static final double RATIO_T = 0.15; 
+    private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|contententry|page|post|text|blog|story|mainContent|container|content|postContent");
+    private static final Pattern NEGATIVE_STYLE = Pattern.compile("hidden|display: ?none|font-size: ?small");
+    private static final int CLUSTER_SIZE = 5;
+	private static final int WORDS_T = 10;
+	private static final double RATIO_T = 0.1; 
 	private NiceTextType niceTextType;
 	
 	public HTMLHelper(){
@@ -43,62 +39,95 @@ public class HTMLHelper {
 	}
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();		
-		htmlHelper.getHTML("http://www.mediabistro.com/alltwitter/linguistics-professor-finds-average-word-length-in-a-tweet-is-longer-than-in-shakespeare_b15314");
+		NiceTextType niceTextType = htmlHelper.getNiceText("http://www.nytimes.com/2013/06/11/us/how-edward-j-snowden-orchestrated-a-blockbuster-story.html?pagewanted=all&_r=0");
+		//System.out.println(niceTextType.getArticleText());
 	}
 	
-	public void getHTML(String url){
+	public NiceTextType getNiceText(String url){
 		try {
 			Document document = Jsoup.connect(url).timeout(60000).userAgent(USER_AGENT).get();
 			//Document document = Jsoup.parse(new File("art.html"), "UTF-8");
 			
-			Element bodyElement = document.body();
-			removeFat(bodyElement);
+			Element bodyElement = removeFat(document.body());
 			Elements bodyElements = bodyElement.getAllElements();
-			articleFinder(niceTextType,bodyElement);
+			articleFinder(bodyElement);
 			niceTextType.setLargestHTMLBlock(findLargestBlock(bodyElements));
-			System.out.println(niceTextType.getLargestHTMLBlock().text());
-			System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-
-			niceTextType.setMainElements(new Elements(flattenDOM(bodyElement)));
-			//System.out.println("Art "+ niceTextType.getArticleHTML());
 			Elements mainElements = calculateBlockSizeRatios(new Elements(flattenDOM(niceTextType.getLargestHTMLBlock())));
-			//Elements mainElements =calculateBlockSizeRatios(bodyElements);
-			//niceTextType.setMainElements(mainElements);
+			Elements elementsOfInterest = calculateBlockSizeRatios(new Elements(flattenDOM(bodyElement)));
+			StringBuffer blockBuffer = new StringBuffer();
 			for (Element element : mainElements) {
 				if (element!=null && (element.isBlock() || POSSIBLE_TEXT_NODES.matcher(element.tagName()).matches())) {
-					System.out.println(element.text());
+					blockBuffer.append(element.text()+"\n");
 				}
 			}
-			System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-			StringBuffer allText = new StringBuffer();
-			StringBuffer allHTML = new StringBuffer();
-			for (Element element : niceTextType.getMainElements()) {
-				if (element!=null) {					
-					allText.append(element.text()+"\n");
-					allHTML.append(element.toString());
-				}
-			}
-			//System.out.println(allText.toString());
-			//System.out.println(allHTML);
-			niceTextType.setAllText(allText.toString());
+			findLargestCluster(elementsOfInterest);
+			niceTextType.setLargestTextBlock(blockBuffer.toString());
+			niceTextType.setAllText(bodyElement.text());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return niceTextType;
 	}
 	
+	private void findLargestCluster(Elements elementsOfInterest) {
+		int nullCounter = 0;
+		Set<Set<Element>> clusterSet = new LinkedHashSet<Set<Element>>();
+		Set<Element> htmlElements = null;
+		boolean isAtleastOneCluster = false;
+		for (Element element : elementsOfInterest) {			
+			if (element!=null && (element.isBlock() || POSSIBLE_TEXT_NODES.matcher(element.tagName()).matches())) {
+				if (htmlElements!=null) {
+					htmlElements.add(element);
+				}
+				else {
+					htmlElements = new LinkedHashSet<Element>();
+					htmlElements.add(element);
+				}
+				nullCounter = 0;
+			}
+			else if (element==null && htmlElements!=null && htmlElements.size()>0){
+				nullCounter++;
+			}
+			if (nullCounter==CLUSTER_SIZE) {
+				clusterSet.add(htmlElements);
+				htmlElements = null;
+				nullCounter = 0;
+				isAtleastOneCluster = true;
+			}
+		}
+		if (!isAtleastOneCluster) {
+			clusterSet.add(htmlElements);
+		}
+		for (Set<Element> c : clusterSet) {
+			System.out.println("cluster size "+ c.size());
+			for (Element element : c) {
+				System.out.println(element.text());
+			}
+		}
+	}
+	private static String getTextFromElement(Element element){
+		return null;		
+	}
 	private Set<Element> flattenDOM(Element bodyElement) {
 		final Set<Element> flatDOM = new LinkedHashSet<Element>();
 		bodyElement.traverse(new NodeVisitor() {
-		    public void head(Node node, int depth) {
+			private int parentTextSize = 0;
+		    @Override
+			public void head(Node node, int depth) {
 		    	if (node instanceof Element) {
 					Element innerElement = (Element)node;
+					Element parentElement = innerElement.parent();
+					if (parentElement!=null) {
+						parentTextSize = parentElement.ownText().length();
+					}
 					//if ((innerElement.isBlock() || POSSIBLE_TEXT_NODES.matcher(innerElement.tagName()).matches())&& innerElement.text().length()>50) {
-					if (innerElement.ownText().length()>=WORDS_T) {	
+					if (innerElement.ownText().length()>=WORDS_T && parentTextSize==0) {	
 						flatDOM.add(innerElement);
 					}
 				}
 		    }
-		    public void tail(Node node, int depth) {
+		    @Override
+			public void tail(Node node, int depth) {
 		        //System.out.println("Exiting tag: " + node.nodeName());
 		    }
 		});		
@@ -117,7 +146,6 @@ public class HTMLHelper {
 		Map<Integer, Double> sizeMap = calculateSize(mainElements);
 		Map<Integer, Double> k = findMax(sizeMap.values());
 		int sizeOfMap = sizeMap.size();
-		List<Integer> elemIndexForRemoval = new ArrayList<Integer>();
 		Set<Integer> keySet = sizeMap.keySet();
 		int maxIndex = 0;
 		for (Integer j : k.keySet()) {
@@ -128,11 +156,8 @@ public class HTMLHelper {
 		}
 		for (int i =0; i<sizeOfMap;i++) { 
 			if (sizeMap.get(i)<RATIO_T) {
-				elemIndexForRemoval.add(i);
+				mainElements.set(i, null);
 			}
-		}
-		for (int index : elemIndexForRemoval) {
-			mainElements.set(index, null);
 		}
 		return mainElements;
 	}
@@ -154,22 +179,10 @@ public class HTMLHelper {
 	private Map<Integer, Double> calculateSize(Elements elements) {
 		Map<Integer, Double> sizeMap = new LinkedHashMap<Integer, Double>();
 		for (int i=0;i< elements.size();i++) {
-			sizeMap.put(i, (double)elements.get(i).text().length());
+			sizeMap.put(i, (double)elements.get(i).ownText().length());
 		}
 		return sizeMap;
 	}
-	private Set<Element> removeFat2(Element e) {
-        Set<Element> nodes = new LinkedHashSet<Element>(64);
-        Elements allBodyElements = e.children();
-        for (Element el : allBodyElements) {
-            if (POSSIBLE_TEXT_NODES.matcher(el.tagName()).matches()) {
-            	if (el.hasText()) {
-            		nodes.add(el);
-				}                
-            }
-        }
-        return nodes;
-    }
     private Element removeFat(Element doc) {
         Elements scripts = doc.getElementsByTag("script");
         for (Element item : scripts) {
@@ -187,18 +200,20 @@ public class HTMLHelper {
         }
         Elements nonTextElements = doc.getAllElements();
         for (Element nonTextElement : nonTextElements) {
-			if (!nonTextElement.hasText() || nonTextElement.text().length()<=WORDS_T) {
+			String style = nonTextElement.attr("style");
+			if (!nonTextElement.hasText() || nonTextElement.text().length()<=WORDS_T || (style != null && !style.isEmpty() && NEGATIVE_STYLE.matcher(style).find())) {
 				nonTextElement.remove();
 			}
 		}
         return doc;
     }
     
-    private void articleFinder(NiceTextType niceTextType,Element bodyElement){
+    private void articleFinder(Element bodyElement){
     	for (Element el : bodyElement.getAllElements()) {
             if (ARTICLE_NODES.matcher(el.tagName()).matches()||MAIN_BLOCK_CLASSES_IDS.matcher(el.className()).matches() || MAIN_BLOCK_CLASSES_IDS.matcher(el.attr("id")).matches()) {
             	if (el.hasText()) {
             		niceTextType.setArticleHTML(el);
+            		niceTextType.setArticleText(el.text());
             		break;
 				}                
             }

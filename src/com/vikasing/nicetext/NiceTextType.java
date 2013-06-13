@@ -4,7 +4,6 @@
 package com.vikasing.nicetext;
 
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  * @author vikasing
@@ -15,9 +14,9 @@ public class NiceTextType {
 	private String largestTextBlock;
 	private Element largestHTMLBlock;
 	private String allText;
-	private Elements mainElements;
 	private String articleText;
 	private Element articleHTML;
+	private String niceText;
 	/**
 	 * @return the pageTitle
 	 */
@@ -67,18 +66,6 @@ public class NiceTextType {
 		this.largestHTMLBlock = largestHTMLBlock;
 	}
 	/**
-	 * @return the mainElements
-	 */
-	public Elements getMainElements() {
-		return mainElements;
-	}
-	/**
-	 * @param mainElements the mainElements to set
-	 */
-	public void setMainElements(Elements mainElements) {
-		this.mainElements = mainElements;
-	}
-	/**
 	 * @return the articleText
 	 */
 	public String getArticleText() {
@@ -101,6 +88,18 @@ public class NiceTextType {
 	 */
 	public void setArticleHTML(Element articleHTML) {
 		this.articleHTML = articleHTML;
+	}
+	/**
+	 * @return the niceText
+	 */
+	public String getNiceText() {
+		return niceText;
+	}
+	/**
+	 * @param niceText the niceText to set
+	 */
+	public void setNiceText(String niceText) {
+		this.niceText = niceText;
 	}
 
 }
