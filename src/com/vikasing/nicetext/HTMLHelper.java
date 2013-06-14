@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -29,8 +31,8 @@ public class HTMLHelper {
     private static final Pattern ARTICLE_NODES = Pattern.compile("article|section|tmp");
     private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|contententry|page|post|text|blog|story|mainContent|container|content|postContent");
     private static final Pattern NEGATIVE_STYLE = Pattern.compile("hidden|display: ?none|font-size: ?small");
-    private static final int CLUSTER_SIZE = 5;
-	private static final int WORDS_T = 10;
+    private static final int CLUSTER_DISTANCE = 4;
+	private static final int WORDS_T = 5;
 	private static final double RATIO_T = 0.1; 
 	private NiceTextType niceTextType;
 	
@@ -39,7 +41,7 @@ public class HTMLHelper {
 	}
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();		
-		NiceTextType niceTextType = htmlHelper.getNiceText("http://www.nytimes.com/2013/06/11/us/how-edward-j-snowden-orchestrated-a-blockbuster-story.html?pagewanted=all&_r=0");
+		NiceTextType niceTextType = htmlHelper.getNiceText("http://www.bbc.co.uk/news/uk-22902098");
 		//System.out.println(niceTextType.getArticleText());
 	}
 	
@@ -60,7 +62,20 @@ public class HTMLHelper {
 					blockBuffer.append(element.text()+"\n");
 				}
 			}
-			findLargestCluster(elementsOfInterest);
+			List<Set<Element>> clusterSet = findClusters(elementsOfInterest);
+			int maxCSize = 0;
+			Set<Element> largestCluster = null;
+			for (Set<Element> c : clusterSet) {
+				if (maxCSize<c.size()) {
+					maxCSize = c.size();
+					largestCluster = c;
+				}				
+			}
+			StringBuffer niceTextBuffer = new StringBuffer();
+			for (Element element : largestCluster) {
+				niceTextBuffer.append(element.text()+"\n");
+			}
+			niceTextType.setNiceText(niceTextBuffer.toString());
 			niceTextType.setLargestTextBlock(blockBuffer.toString());
 			niceTextType.setAllText(bodyElement.text());
 		} catch (IOException e) {
@@ -69,12 +84,11 @@ public class HTMLHelper {
 		return niceTextType;
 	}
 	
-	private void findLargestCluster(Elements elementsOfInterest) {
+	private List<Set<Element>> findClusters(Elements elements) {
 		int nullCounter = 0;
-		Set<Set<Element>> clusterSet = new LinkedHashSet<Set<Element>>();
+		List<Set<Element>> clusters = new LinkedList<Set<Element>>();
 		Set<Element> htmlElements = null;
-		boolean isAtleastOneCluster = false;
-		for (Element element : elementsOfInterest) {			
+		for (Element element : elements) {			
 			if (element!=null && (element.isBlock() || POSSIBLE_TEXT_NODES.matcher(element.tagName()).matches())) {
 				if (htmlElements!=null) {
 					htmlElements.add(element);
@@ -88,22 +102,16 @@ public class HTMLHelper {
 			else if (element==null && htmlElements!=null && htmlElements.size()>0){
 				nullCounter++;
 			}
-			if (nullCounter==CLUSTER_SIZE) {
-				clusterSet.add(htmlElements);
+			if (nullCounter==CLUSTER_DISTANCE) {
+				clusters.add(htmlElements);
 				htmlElements = null;
 				nullCounter = 0;
-				isAtleastOneCluster = true;
 			}
 		}
-		if (!isAtleastOneCluster) {
-			clusterSet.add(htmlElements);
-		}
-		for (Set<Element> c : clusterSet) {
-			System.out.println("cluster size "+ c.size());
-			for (Element element : c) {
-				System.out.println(element.text());
-			}
-		}
+		if (clusters.size()==0) {
+			clusters.add(htmlElements);
+		}		
+		return clusters;
 	}
 	private static String getTextFromElement(Element element){
 		return null;		
@@ -183,6 +191,7 @@ public class HTMLHelper {
 		}
 		return sizeMap;
 	}
+	
     private Element removeFat(Element doc) {
         Elements scripts = doc.getElementsByTag("script");
         for (Element item : scripts) {
