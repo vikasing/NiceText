@@ -41,7 +41,7 @@ public class HTMLHelper {
 	}
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();		
-		NiceTextType niceTextType = htmlHelper.getNiceText("http://www.bbc.co.uk/news/uk-22902098");
+		NiceTextType niceTextType = htmlHelper.getNiceText("http://www.itwire.com/business-it-news/open-source/60292-red-hat-ditches-mysql-switches-to-mariadb");
 		//System.out.println(niceTextType.getArticleText());
 	}
 	
