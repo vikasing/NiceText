@@ -78,6 +78,7 @@ public class HTMLHelper {
 			niceTextType.setNiceText(niceTextBuffer.toString());
 			niceTextType.setLargestTextBlock(blockBuffer.toString());
 			niceTextType.setAllText(bodyElement.text());
+			niceTextType.setPageTitle(document.title());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
