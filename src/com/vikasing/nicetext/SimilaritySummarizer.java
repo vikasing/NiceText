@@ -15,14 +15,16 @@ public class SimilaritySummarizer extends Summarize {
 	@Override
 	public String summarizeText() {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getNiceText("http://opinionator.blogs.nytimes.com/2013/06/15/i-know-what-you-think-of-me/").getNiceText();
+		String text = htmlHelper.getNiceText("http://online.wsj.com/article/SB10001424127887324577904578554672659491946.html").getNiceText();
 		String[] textA = text.split("\\.");
+		StringBuffer summBuffer = new StringBuffer();
 		for (int i = 0; i < textA.length-1; i++) {
 			double sim = findSimilarity(textA[i],textA[i+1]);
-			if (sim>0.1) {
-				System.out.println(textA[i]);
+			if (sim>0.2 ) {
+				summBuffer.append(textA[i].trim()+". ");
 			}
 		}
+		System.out.println(summBuffer.toString());
 		return null;
 	}
 
