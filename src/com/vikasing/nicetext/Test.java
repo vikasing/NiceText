@@ -18,7 +18,9 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getText("http://www.newscientist.com/article/dn23780-quantum-mechanics-enables-impossible-space-chemistry.html#.UdB93fnddCM").getNiceText();
+		String text = htmlHelper.getText("http://www.theatlantic.com/sexes/archive/2013/06/stop-penalizing-boys-for-not-being-able-to-sit-still-at-school/276976/").getNiceText();
+		System.out.println(text);
+		
 		NGramExtracter nExtracter = new NGramExtracter();
 		Map<String, SortedSet<Entry<String, Integer>>> nGramMap = nExtracter.getNGrams(text);
 		SortedSet<Entry<String, Integer>> bigrams = nGramMap.get("bi");

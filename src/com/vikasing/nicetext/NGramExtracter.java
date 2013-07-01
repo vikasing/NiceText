@@ -65,8 +65,7 @@ public class NGramExtracter {
 			if (!words[j].isEmpty() && words[j].length()>1){
 				nGram = words[j];
 				if(monoGramMap.containsKey(nGram)){
-					int counter = monoGramMap.get(nGram);
-					monoGramMap.put(nGram, counter+1);
+					monoGramMap.put(nGram, monoGramMap.get(nGram)+1);
 				}
 				else {
 					monoGramMap.put(nGram, 1);
@@ -77,8 +76,7 @@ public class NGramExtracter {
 				if (!words[j].isEmpty() && words[j].length()>1 && !words[j+1].isEmpty() && words[j+1].length()>1 ){
 					nGram = words[j]+" "+words[j+1];
 					if(biGramMap.containsKey(nGram)){
-						int counter = biGramMap.get(nGram);
-						biGramMap.put(nGram, counter+1);
+						biGramMap.put(nGram, biGramMap.get(nGram)+1);
 					}
 					else {
 						biGramMap.put(nGram, 1);
@@ -89,8 +87,7 @@ public class NGramExtracter {
 					if (!words[j].isEmpty() && words[j].length()>1 && !words[j+1].isEmpty() && words[j+1].length()>1  && !words[j+2].isEmpty() && words[j+2].length()>1){  
 						nGram = words[j]+" "+words[j+1]+" "+words[j+2];
 						if(triGramMap.containsKey(nGram)){
-							int counter = triGramMap.get(nGram);
-							triGramMap.put(nGram, counter+1);
+							triGramMap.put(nGram, triGramMap.get(nGram)+1);
 						}
 						else {
 							triGramMap.put(nGram, 1);
