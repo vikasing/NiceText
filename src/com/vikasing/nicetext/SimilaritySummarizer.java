@@ -15,7 +15,8 @@ public class SimilaritySummarizer extends Summarize {
 	@Override
 	public String summarizeText() {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getNiceText("http://online.wsj.com/article/SB10001424127887324577904578554672659491946.html").getNiceText();
+		String text = htmlHelper.getText("http://techcrunch.com/2013/06/24/google-launches-cloud-playground-a-browser-based-environment-for-trying-its-cloud-platform/").getNiceText();
+		System.out.println(text);
 		String[] textA = text.split("\\.");
 		StringBuffer summBuffer = new StringBuffer();
 		for (int i = 0; i < textA.length-1; i++) {
@@ -24,6 +25,7 @@ public class SimilaritySummarizer extends Summarize {
 				summBuffer.append(textA[i].trim()+". ");
 			}
 		}
+		System.out.println("===============================");
 		System.out.println(summBuffer.toString());
 		return null;
 	}

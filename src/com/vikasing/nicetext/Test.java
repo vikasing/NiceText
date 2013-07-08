@@ -18,7 +18,7 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getText("http://www.theatlantic.com/sexes/archive/2013/06/stop-penalizing-boys-for-not-being-able-to-sit-still-at-school/276976/").getNiceText();
+		String text = htmlHelper.getText("http://www.salon.com/2013/07/07/%E2%80%9Cwhy_did_you_shoot_me_i_was_reading_a_book_the_new_warrior_cop_is_out_of_control/").getNiceText();
 		System.out.println(text);
 		
 		NGramExtracter nExtracter = new NGramExtracter();
