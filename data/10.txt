@@ -1,0 +1,9 @@
+BlackBerry has finally given in to demands from the Indian government to access its consumer messaging services, although enterprise communications will remain safe from prying eyes.
+An internal Department of Telecommunications document seen by Economic Times apparently declared that the “lawful interception system for BlackBerry services” is now ready.
+The report seems accurate, as BlackBerry has issued statement with the following soothing words:
+The lawful access capability now available to BlackBerry's carrier partners meets the standard required by the Government of India for all consumer messaging services offered in the Indian marketplace. We also wish to underscore, once again, that this enablement of lawful access does not extend to BlackBerry Enterprise Server.
+Enterprise customers will remain safe from India’s spooks after BlackBerry presumably persuaded the authorities that it doesn’t have – and indeed never did have – the BES encryption keys for individual corporates to hand over.
+But the report suggests India's mobile operators will henceforth be able to let local authorities intercept in emails, email attachments and web traffic on devices using the BlackBerry Internet Service (BIS) and check whether BlackBerry Messenger (BBM) chats have been “delivered” or “read”. Such interception will be possible in real time
+BlackBerry BIS and BBM communications will now presumably be made available through Indian's controversial Central Monitoring System (CMS), when it finally comes online.
+BlackBerry will be hoping it can now put the long-running dispute with the Indian government behind it and concentrate on turning the company around.
+Its devices remain popular in the sub-continent, which given the explosive growth in smartphones there is surely important. Sadly, as elsewhere around the world, its new Z10 and Q10 handsets have been met with cautious reviews. ®

@@ -6,6 +6,7 @@ package com.vikasing.nicetext;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -33,8 +34,12 @@ public class HTMLHelper {
     private static final Pattern NEGATIVE_STYLE = Pattern.compile("hidden|display: ?none|font-size: ?small");
     private static final int CLUSTER_DISTANCE = 4;
 	private static final int WORDS_T = 5;
-	private double threasholdRatio = 0.1; 
+	private static final int SENT_T = WORDS_T*15;
+
+	private double threasholdRatio; 
+	private static final double DEFAULT_RATIO = 0.1;
 	private NiceTextType niceTextType;
+	private int largestElemIndex = 0;
 	
 	public HTMLHelper(){
 		niceTextType = new NiceTextType();
@@ -52,15 +57,32 @@ public class HTMLHelper {
 			Element bodyElement = removeFat(document.body());
 			//System.out.println(bodyElement);
 			//articleFinder(bodyElement);
+
 			Elements elementsOfInterest = calculateBlockSizeRatios(new Elements(flattenDOM(bodyElement)));
+			Set<Element> mainCluster = findMainCluster(elementsOfInterest);
+			Set<Element> largestCluster = null;
+			int mainClusterTextSize = 0;
+			for (Element e : mainCluster) {
+				mainClusterTextSize += e.text().length();
+			}
 			List<Set<Element>> clusterSet = findClusters(elementsOfInterest);
 			int maxCSize = 0;
-			Set<Element> largestCluster = null;
+			Set<Element> lCluster = null;
 			for (Set<Element> c : clusterSet) {
-				if (maxCSize<c.size()) {
-					maxCSize = c.size();
-					largestCluster = c;
+				int textSize = 0;
+				for (Element elem : c) {
+					textSize += elem.text().length();
 				}				
+				if (maxCSize<textSize) {
+					maxCSize = textSize;
+					lCluster = c;
+				}			
+			}
+			if (maxCSize>=mainClusterTextSize) {
+				largestCluster = lCluster;
+			}
+			else {
+				largestCluster = mainCluster;
 			}
 			StringBuffer niceTextBuffer = new StringBuffer();
 			for (Element element : largestCluster) {
@@ -76,6 +98,35 @@ public class HTMLHelper {
 		return niceTextType;
 	}
 	
+	private Set<Element> findMainCluster(Elements elementsOfInterest) {
+		Set<Element> htmlElements =  new LinkedHashSet<Element>();
+		int beg = largestElemIndex, end = largestElemIndex, negNullCounter = 0, posNullCounter = 0,index = 0;
+		while(negNullCounter<=CLUSTER_DISTANCE || posNullCounter<=CLUSTER_DISTANCE){
+			if (elementsOfInterest.get(largestElemIndex-index)!=null && negNullCounter<CLUSTER_DISTANCE) {
+				beg--;
+			}
+			else {
+				negNullCounter++;
+			}
+			if (elementsOfInterest.get(largestElemIndex+index)!=null && posNullCounter<CLUSTER_DISTANCE) {
+				end++;
+			}
+			else{
+				posNullCounter++;
+			}
+			index++;
+		}
+		//System.out.println(beg+" "+end);
+		while (end-beg>0 ) {
+			Element element = elementsOfInterest.get(beg+1);
+			if (element!=null && (element.isBlock() || POSSIBLE_TEXT_NODES.matcher(element.tagName()).matches())) {
+				htmlElements.add(element);
+			}
+			beg++;
+		}
+		return htmlElements;
+	}	
+
 	private List<Set<Element>> findClusters(Elements elements) {
 		int nullCounter = 0;
 		List<Set<Element>> clusters = new LinkedList<Set<Element>>();
@@ -144,7 +195,7 @@ public class HTMLHelper {
 			sizeMap.put(key, sizeMap.get(key)/k.get(maxIndex));
 		}
 		for (int i =0; i<sizeOfMap;i++) { 
-			if (sizeMap.get(i)<threasholdRatio) {
+			if (sizeMap.get(i)<Math.min(DEFAULT_RATIO, threasholdRatio)) {
 				mainElements.set(i, null);
 			}
 		}
@@ -163,7 +214,9 @@ public class HTMLHelper {
 			}
 			total = total + (Double)valuesArr[i];
 		}
-		this.threasholdRatio=total/(values.size()*max);
+		this.largestElemIndex = maxIndex;
+		this.threasholdRatio = Math.max(total/(values.size()*max),SENT_T/(values.size()*max));
+		//System.out.println(threasholdRatio);
 		maxElement.put(maxIndex, max);
 		return maxElement;
 	}
