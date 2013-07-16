@@ -28,11 +28,11 @@ import org.jsoup.select.NodeVisitor;
  */
 public class HTMLHelper {
 	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
-    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp|li");
+    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp|li|font");
     //private static final Pattern ARTICLE_NODES = Pattern.compile("article|section|tmp");
     //private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|contententry|page|post|text|blog|story|mainContent|container|content|postContent");
     private static final Pattern NEGATIVE_STYLE = Pattern.compile("hidden|display: ?none|font-size: ?small");
-    private static final int CLUSTER_DISTANCE = 4;
+    private static final int CLUSTER_DISTANCE = 5;
 	private static final int WORDS_T = 5;
 	private static final int SENT_T = WORDS_T*15;
 
@@ -102,13 +102,13 @@ public class HTMLHelper {
 		Set<Element> htmlElements =  new LinkedHashSet<Element>();
 		int beg = largestElemIndex, end = largestElemIndex, negNullCounter = 0, posNullCounter = 0,index = 0;
 		while(negNullCounter<=CLUSTER_DISTANCE || posNullCounter<=CLUSTER_DISTANCE){
-			if (elementsOfInterest.get(largestElemIndex-index)!=null && negNullCounter<CLUSTER_DISTANCE) {
+			if (largestElemIndex>0 && negNullCounter<CLUSTER_DISTANCE && elementsOfInterest.get(largestElemIndex-index)!=null) {
 				beg--;
 			}
 			else {
 				negNullCounter++;
 			}
-			if (elementsOfInterest.get(largestElemIndex+index)!=null && posNullCounter<CLUSTER_DISTANCE) {
+			if (largestElemIndex>0  && posNullCounter<CLUSTER_DISTANCE && elementsOfInterest.get(largestElemIndex+index)!=null) {
 				end++;
 			}
 			else{
@@ -117,13 +117,17 @@ public class HTMLHelper {
 			index++;
 		}
 		//System.out.println(beg+" "+end);
-		while (end-beg>0 ) {
-			Element element = elementsOfInterest.get(beg+1);
+		//if (largestElemIndex==0) {
+		//	htmlElements.add(elementsOfInterest.get(0));
+		//}
+		while (end-beg>=0 ) {
+			Element element = elementsOfInterest.get(beg);
 			if (element!=null && (element.isBlock() || POSSIBLE_TEXT_NODES.matcher(element.tagName()).matches())) {
 				htmlElements.add(element);
 			}
 			beg++;
 		}
+		
 		return htmlElements;
 	}	
 

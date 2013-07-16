@@ -31,7 +31,7 @@ public class TfIdf {
 		StringBuffer allText = new StringBuffer();
 		int totalDocs = files.length;
 
-		Map<String, Integer> sizeMap = new HashMap<String, Integer>();
+		//Map<String, Integer> sizeMap = new HashMap<String, Integer>();
 		for (int i = 0; i < totalDocs; i++) {
 			FileInputStream fileStream = null;
 			InputStreamReader iReader = null;
@@ -47,8 +47,8 @@ public class TfIdf {
 				}
 				String text = stringBuffer.toString();
 				allText.append(text+" ");
-				int tSize = text.split(" ").length;
-				sizeMap.put(files[i].getName(), tSize);
+				//int tSize = text.split(" ").length;
+				//sizeMap.put(files[i].getName(), tSize);
 				ngramDocMap.put(files[i].getName(),nGramExtracter.getNGrams(text));
 				
 			} catch(Exception e) {
@@ -123,17 +123,18 @@ public class TfIdf {
 	private void calculateTFIDF(int[][] bigArr, String[] allGs) {
 		for (int j = 0; j < bigArr.length; j++) {
 			int counter = 0;
-			for (int k = 0; k < bigArr[j].length; k++) {
+			int numOfDocs = bigArr[j].length;
+			for (int k = 0; k < numOfDocs; k++) {
 				if (bigArr[j][k]!=0) {
 					counter++;
 				}
 			}
 			
-			for (int k = 0; k < bigArr[j].length; k++) {
-				if (bigArr[j][k]!=0 && k==5) {
-					double tf = (double)bigArr[j][k];
-					double idf = Math.log((double)bigArr[j].length/(double)counter);
-					if (tf*idf>4) {
+			for (int k = 0; k < numOfDocs; k++) {
+				if (bigArr[j][k]!=0) {
+					double tf = Math.log((double)bigArr[j][k]+1);//(double)bigArr[j][k];
+					double idf = Math.log((double)numOfDocs/(double)counter);
+					if (tf*idf>5) {
 						System.out.println("Doc "+k+" "+allGs[j]+" "+ tf*idf);
 					}
 				}
