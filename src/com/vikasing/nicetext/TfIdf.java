@@ -10,11 +10,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.jblas.DoubleMatrix;
 
 /**
  * @author vikasing
@@ -77,9 +80,9 @@ public class TfIdf {
 			allTris.add(entry.getKey());
 		}
 		
-		int[][] monoArr = new int[allMonos.size()][totalDocs];
-		int[][] biArr = new int[allBis.size()][totalDocs];
-		int[][] triArr = new int[allTris.size()][totalDocs];
+		double[][] monoArr = new double[allMonos.size()][totalDocs];
+		double[][] biArr = new double[allBis.size()][totalDocs];
+		double[][] triArr = new double[allTris.size()][totalDocs];
 		
 		String[] allMonoArr =  allMonos.toArray(new String[allMonos.size()]);
 		String[] allBiArr =  allBis.toArray(new String[allBis.size()]);
@@ -120,7 +123,21 @@ public class TfIdf {
 	 * @param bigArr
 	 * @param allGs
 	 */
-	private void calculateTFIDF(int[][] bigArr, String[] allGs) {
+	private void calculateTFIDF(double[][] bigArr, String[] allGs) {
+		DoubleMatrix doubleMatrix = new DoubleMatrix(bigArr);
+		int columns = doubleMatrix.columns;
+		Map<Integer, Integer> maxFreqMap = new LinkedHashMap<Integer, Integer>();
+		for (int i = 0; i < columns; i++) {
+			DoubleMatrix aColumn = doubleMatrix.getColumn(i);
+			int largestF = 0;
+			for (int j = 0; j < aColumn.rows; j++) {
+				int temp = (int) aColumn.get(j);
+				if (temp>largestF) {
+					largestF = temp;
+				}
+			}
+			maxFreqMap.put(i, largestF);
+		}
 		for (int j = 0; j < bigArr.length; j++) {
 			int counter = 0;
 			int numOfDocs = bigArr[j].length;
@@ -131,10 +148,12 @@ public class TfIdf {
 			}
 			
 			for (int k = 0; k < numOfDocs; k++) {
-				if (bigArr[j][k]!=0) {
-					double tf = Math.log((double)bigArr[j][k]+1);//(double)bigArr[j][k];
+				if (bigArr[j][k]!=0 && k==5) {
+					double tf = Math.log(bigArr[j][k]+1);
+					//double tf = bigArr[j][k];
+					//double tf = 0.5 + (0.5*bigArr[j][k])/(double)maxFreqMap.get(k);
 					double idf = Math.log((double)numOfDocs/(double)counter);
-					if (tf*idf>5) {
+					if (tf*idf>8) {
 						System.out.println("Doc "+k+" "+allGs[j]+" "+ tf*idf);
 					}
 				}
