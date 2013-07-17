@@ -139,21 +139,20 @@ public class TfIdf {
 			maxFreqMap.put(i, largestF);
 		}
 		for (int j = 0; j < bigArr.length; j++) {
-			int counter = 0;
+			double counter = 0;
 			int numOfDocs = bigArr[j].length;
 			for (int k = 0; k < numOfDocs; k++) {
 				if (bigArr[j][k]!=0) {
-					counter++;
+					counter ++;
 				}
-			}
-			
+			}			
 			for (int k = 0; k < numOfDocs; k++) {
-				if (bigArr[j][k]!=0 && k==5) {
-					double tf = Math.log(bigArr[j][k]+1);
+				if (bigArr[j][k]!=0) {
+					//double tf = Math.log(bigArr[j][k]+1);
 					//double tf = bigArr[j][k];
-					//double tf = 0.5 + (0.5*bigArr[j][k])/(double)maxFreqMap.get(k);
-					double idf = Math.log((double)numOfDocs/(double)counter);
-					if (tf*idf>8) {
+					double tf = 0.5 + (0.5*bigArr[j][k])/(double)maxFreqMap.get(k);
+					double idf = Math.log((double)numOfDocs/counter);
+					if (tf*idf>2.42) {
 						System.out.println("Doc "+k+" "+allGs[j]+" "+ tf*idf);
 					}
 				}

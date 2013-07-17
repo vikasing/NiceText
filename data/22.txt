@@ -1,0 +1,21 @@
+Microsoft calls for transparency over security requests
+Microsoft is urging openness for classified data requests
+The US attorney general is reviewing a letter from Microsoft asking that it be allowed to publish more detail about US National Security Agency requests for user data.
+The software giant suggests a gagging order is unconstitutional.
+Leaked documents indicate the company has provided access to emails, Skype video calls and uploaded documents.
+Microsoft has said that it only provides "specific data" after checking the legality of the requests.
+It added that: "Numerous documents are now in the public domain.
+"As a result, there is no longer a compelling government interest in stopping those of us with knowledge from sharing more information, especially when this information is likely to help allay public concerns."
+The letter marks Microsoft's latest effort to make secret security requests more open.
+In it, the company's general counsel, Bradford Smith, asks US Attorney General Eric Holder to intervene because it believes "the constitution itself is suffering".
+The company says government agencies are taking too long to agree how much information it can release.
+In the meantime, it says, media reports have "misinterpreted" its disclosure practices.
+It will take the personal involvement of you or the President to set things right.”
+"In my opinion, these issues are languishing amidst discussions among multiple parts of the government, the constitution itself is suffering, and it will take the personal involvement of you or the president to set things right," Mr Smith added.
+Currently, Microsoft - along with other tech giants such as Google and Facebook - is limited in what it can say publicly about requests for information from the National Security Agency (NSA).
+It is unable to provide a breakout figure for how many requests it receives from the agency, and can only aggregate the number with requests from other law enforcement agencies.
+In June Microsoft said it had received between 6,000 and 7,000 such requests over the last six months of 2012.
+Last month it filed a motion in a secret court asking for permission to release detail as to where the different requests came from. It says it is still waiting for a response.
+Earlier this week Microsoft also strongly denied claims it provided the NSA special access to customers' unencrypted emails and Skype video calls under the agency's Prism surveillance scheme.
+The company said it did not give the US government "unfettered" access to its servers, only handing over information about specific accounts after reviewing the legality of requests.
+The Prism system was exposed last month in documents supplied by former NSA contractor Edward Snowden.

@@ -102,13 +102,13 @@ public class HTMLHelper {
 		Set<Element> htmlElements =  new LinkedHashSet<Element>();
 		int beg = largestElemIndex, end = largestElemIndex, negNullCounter = 0, posNullCounter = 0,index = 0;
 		while(negNullCounter<=CLUSTER_DISTANCE || posNullCounter<=CLUSTER_DISTANCE){
-			if (largestElemIndex>0 && negNullCounter<CLUSTER_DISTANCE && elementsOfInterest.get(largestElemIndex-index)!=null) {
+			if (largestElemIndex>0 && negNullCounter<CLUSTER_DISTANCE && (largestElemIndex-index)>-1 && elementsOfInterest.get(largestElemIndex-index)!=null) {
 				beg--;
 			}
 			else {
 				negNullCounter++;
 			}
-			if (largestElemIndex>0  && posNullCounter<CLUSTER_DISTANCE && elementsOfInterest.get(largestElemIndex+index)!=null) {
+			if (largestElemIndex>0  && posNullCounter<CLUSTER_DISTANCE && elementsOfInterest.size()>(largestElemIndex+index+1) && elementsOfInterest.get(largestElemIndex+index)!=null) {
 				end++;
 			}
 			else{

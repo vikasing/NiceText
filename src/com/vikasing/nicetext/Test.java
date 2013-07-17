@@ -18,7 +18,7 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getText("http://www.nature.com/news/proof-mooted-for-quantum-uncertainty-1.13270").getNiceText();
+		String text = htmlHelper.getText("http://www.bbc.co.uk/news/world-latin-america-23339020").getNiceText();
 		System.out.println(text);
 		
 /*		NGramExtracter nExtracter = new NGramExtracter();
