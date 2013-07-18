@@ -89,8 +89,10 @@ public class TfIdf {
 		String[] allTriArr = allTris.toArray(new String[allTris.size()]);
 		
 		Set<String> fileNameSet = ngramDocMap.keySet();
+		Map<Integer, String> fileNameMap = new HashMap<Integer, String>();
 		int i = 0;
 		for (String fileName : fileNameSet) {
+			fileNameMap.put(i, fileName);
 			Map<String, SortedSet<Entry<String, Integer>>> ngMap = ngramDocMap.get(fileName);
 			SortedSet<Entry<String, Integer>> monos = ngMap.get("mono");
 			for (Entry<String, Integer> monoEntry : monos) {
@@ -115,15 +117,16 @@ public class TfIdf {
 			}
 			i++;
 		}
-		calculateTFIDF(monoArr, allMonoArr);		
-		calculateTFIDF(biArr, allBiArr);
-		calculateTFIDF(triArr, allTriArr);		
+		calculateTFIDF(monoArr, allMonoArr, fileNameMap);		
+		calculateTFIDF(biArr, allBiArr, fileNameMap);
+		calculateTFIDF(triArr, allTriArr, fileNameMap);		
 	}
 	/**
 	 * @param bigArr
 	 * @param allGs
+	 * @param fileNameMap 
 	 */
-	private void calculateTFIDF(double[][] bigArr, String[] allGs) {
+	private void calculateTFIDF(double[][] bigArr, String[] allGs, Map<Integer, String> fileNameMap) {
 		DoubleMatrix doubleMatrix = new DoubleMatrix(bigArr);
 		int columns = doubleMatrix.columns;
 		Map<Integer, Integer> maxFreqMap = new LinkedHashMap<Integer, Integer>();
@@ -150,10 +153,10 @@ public class TfIdf {
 				if (bigArr[j][k]!=0) {
 					//double tf = Math.log(bigArr[j][k]+1);
 					//double tf = bigArr[j][k];
-					double tf = 0.5 + (0.5*bigArr[j][k])/(double)maxFreqMap.get(k);
+					double tf = 0.4 + (0.6*bigArr[j][k])/(double)maxFreqMap.get(k);
 					double idf = Math.log((double)numOfDocs/counter);
-					if (tf*idf>2.42) {
-						System.out.println("Doc "+k+" "+allGs[j]+" "+ tf*idf);
+					if (tf*idf>2.5) {
+						System.out.println(fileNameMap.get(k)+" "+allGs[j]+" "+ tf*idf);
 					}
 				}
 			}

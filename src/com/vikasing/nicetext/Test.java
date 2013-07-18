@@ -3,9 +3,6 @@
  */
 package com.vikasing.nicetext;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
 
 /**
  * @author vikasing
@@ -18,7 +15,7 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getText("http://www.bbc.co.uk/news/world-latin-america-23339020").getNiceText();
+		String text = htmlHelper.getText("http://www.guardian.co.uk/books/2013/may/19/dan-brown-inferno-review").getNiceText();
 		System.out.println(text);
 		
 /*		NGramExtracter nExtracter = new NGramExtracter();

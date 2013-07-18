@@ -6,7 +6,6 @@ package com.vikasing.nicetext;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -28,7 +27,8 @@ import org.jsoup.select.NodeVisitor;
  */
 public class HTMLHelper {
 	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
-    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp|li|font");
+    private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp|li|font|em");
+    private static final String[] UNWRAP_TAGS = {"b","u","i","font","em","a"};
     //private static final Pattern ARTICLE_NODES = Pattern.compile("article|section|tmp");
     //private static final Pattern MAIN_BLOCK_CLASSES_IDS = Pattern.compile("article|section|tmp|contententry|page|post|text|blog|story|mainContent|container|content|postContent");
     private static final Pattern NEGATIVE_STYLE = Pattern.compile("hidden|display: ?none|font-size: ?small");
@@ -57,8 +57,8 @@ public class HTMLHelper {
 			Element bodyElement = removeFat(document.body());
 			//System.out.println(bodyElement);
 			//articleFinder(bodyElement);
-
-			Elements elementsOfInterest = calculateBlockSizeRatios(new Elements(flattenDOM(bodyElement)));
+			Elements flattenElements = new Elements(flattenDOM(bodyElement));
+			Elements elementsOfInterest = calculateBlockSizeRatios(flattenElements);
 			Set<Element> mainCluster = findMainCluster(elementsOfInterest);
 			Set<Element> largestCluster = null;
 			int mainClusterTextSize = 0;
@@ -234,6 +234,9 @@ public class HTMLHelper {
 	}
 	
     private Element removeFat(Element doc) {
+    	for (int i = 0; i < UNWRAP_TAGS.length; i++) {
+        	doc.select(UNWRAP_TAGS[i]).unwrap();
+		}
         Elements scripts = doc.getElementsByTag("script");
         for (Element item : scripts) {
             item.remove();
