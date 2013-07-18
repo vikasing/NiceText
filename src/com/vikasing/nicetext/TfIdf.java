@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -117,18 +118,39 @@ public class TfIdf {
 			}
 			i++;
 		}
-		calculateTFIDF(monoArr, allMonoArr, fileNameMap);		
-		calculateTFIDF(biArr, allBiArr, fileNameMap);
-		calculateTFIDF(triArr, allTriArr, fileNameMap);		
+		Map<String, Map<String, Double>> monoKeywordMap = calculateTFIDF(monoArr, allMonoArr, fileNameMap);		
+		Map<String, Map<String, Double>> biKeywordMap = calculateTFIDF(biArr, allBiArr, fileNameMap);
+		Map<String, Map<String, Double>> triKeywordMap = calculateTFIDF(triArr, allTriArr, fileNameMap);	
+
+
+		for (String fileName : monoKeywordMap.keySet()) {
+			System.out.println("keywords for "+fileName);
+			for (String keyword : monoKeywordMap.get(fileName)) {
+				System.out.println(keyword);
+			}
+		}
+		for (String fileName : biKeywordMap.keySet()) {
+			System.out.println("keywords for "+fileName);
+			for (String keyword : biKeywordMap.get(fileName)) {
+				System.out.println(keyword);
+			}
+		}
+		for (String fileName : triKeywordMap.keySet()) {
+			System.out.println("keywords for "+fileName);
+			for (String keyword : triKeywordMap.get(fileName)) {
+				System.out.println(keyword);
+			}
+		}
 	}
 	/**
 	 * @param bigArr
 	 * @param allGs
 	 * @param fileNameMap 
 	 */
-	private void calculateTFIDF(double[][] bigArr, String[] allGs, Map<Integer, String> fileNameMap) {
+	private Map<String, Map<String, Double>> calculateTFIDF(double[][] bigArr, String[] allGs, Map<Integer, String> fileNameMap) {
 		DoubleMatrix doubleMatrix = new DoubleMatrix(bigArr);
 		int columns = doubleMatrix.columns;
+		Map<String, Map<String, Double>> keywordMap = new HashMap<String, Map<String, Double>>();
 		Map<Integer, Integer> maxFreqMap = new LinkedHashMap<Integer, Integer>();
 		for (int i = 0; i < columns; i++) {
 			DoubleMatrix aColumn = doubleMatrix.getColumn(i);
@@ -155,12 +177,21 @@ public class TfIdf {
 					//double tf = bigArr[j][k];
 					double tf = 0.4 + (0.6*bigArr[j][k])/(double)maxFreqMap.get(k);
 					double idf = Math.log((double)numOfDocs/counter);
-					if (tf*idf>2.5) {
-						System.out.println(fileNameMap.get(k)+" "+allGs[j]+" "+ tf*idf);
+					if (tf*idf>3) {
+						if (keywordMap.containsKey(fileNameMap.get(k))) {
+							keywordMap.get(fileNameMap.get(k)).put(allGs[j],tf*idf);
+						}
+						else {
+							Map<String, Double> keywordScoreMap= new HashMap<String, Double>();
+							keywordScoreMap.put(allGs[j],tf*idf);
+							keywordMap.put(fileNameMap.get(k), keywordScoreMap);
+						}
+						//System.out.println(fileNameMap.get(k)+" "+allGs[j]+" "+ tf*idf);
 					}
 				}
 			}
 		}
+		return keywordMap;
 	}
 	public static void main(String[] args) throws IOException {
 		TfIdf tfIdf = new TfIdf();

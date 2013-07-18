@@ -18,7 +18,7 @@ import java.util.TreeSet;
 public class NGramExtracter {
 
 	private String[] stopWords;
-	
+	private NGrams nGrams = new NGrams();
 	public NGramExtracter(){
 		this.stopWords = defaultStopWords;
 	}
@@ -39,13 +39,12 @@ public class NGramExtracter {
 	 * 
 	 * @return 
 	 */
-	public Map<String, SortedSet<Entry<String, Integer>>> getNGrams(String text){
+	public NGrams getNGrams(String text){
 		
 		Map<String, Integer> monoGramMap = new TreeMap<String, Integer>();
 		Map<String, Integer> biGramMap = new TreeMap<String, Integer>();
 		Map<String, Integer> triGramMap = new TreeMap<String, Integer>();
-		Map<String, SortedSet<Entry<String, Integer>>> nGramMap = new HashMap<String, SortedSet<Entry<String,Integer>>>();
-
+		Map<String, Integer> combinedGramMap = new TreeMap<String, Integer>();
 		text=text.trim();
 		/*		
 		 * Uncomment/comment if you want to remove/not remove the special chars from the text.
@@ -96,21 +95,13 @@ public class NGramExtracter {
 				}
 			}
 		}					
-		nGramMap.put("mono", entriesSortedByValues(monoGramMap));
-		nGramMap.put("bi", entriesSortedByValues(biGramMap));
-		nGramMap.put("tri", entriesSortedByValues(triGramMap));		
-		return nGramMap;
-	}
-	private <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
-	    SortedSet<Map.Entry<K,V>> sortedEntries = new TreeSet<Map.Entry<K,V>>(
-	        new Comparator<Map.Entry<K,V>>() {
-	            @Override public int compare(Map.Entry<K,V> e2, Map.Entry<K,V> e1) {
-                    int res = e1.getValue().compareTo(e2.getValue());
-                    return res != 0 ? res : 1; 
-	            }
-	        }
-	    );
-	    sortedEntries.addAll(map.entrySet());
-	    return sortedEntries;
+		nGrams.setMonoGramMap(monoGramMap);
+		nGrams.setBiGramMap(biGramMap);
+		nGrams.setTriGramMap(triGramMap);
+		combinedGramMap.putAll(monoGramMap);
+		combinedGramMap.putAll(biGramMap);
+		combinedGramMap.putAll(triGramMap);
+		nGrams.setCombinedGramMap(combinedGramMap);
+		return nGrams;
 	}
 }
