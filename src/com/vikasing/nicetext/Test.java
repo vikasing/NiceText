@@ -21,13 +21,16 @@ public class Test {
 		HTMLHelper htmlHelper = new HTMLHelper();
 
 		HtmlUtils htmlUtils = new HtmlUtils();
-		Set<String> urlSet = htmlUtils.getURLsFromHTML("https://news.ycombinator.com/news");
+/*		Set<String> urlSet = htmlUtils.getURLsFromHTML("https://news.ycombinator.com/news");
 		for (String url : urlSet) {
-			System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			System.out.println(url+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 			String text = htmlHelper.getText(url).getNiceText();
 			System.out.println(text);
-		}
-/*		NGramExtracter nExtracter = new NGramExtracter();
+		}*/
+		String text = htmlHelper.getText("http://autos.yahoo.com/news/lamborghini-dynavonto-more-sophisticated-approach-130415871.html").getNiceText();
+		System.out.println(text);
+		/*
+		NGramExtracter nExtracter = new NGramExtracter();
 		Map<String, SortedSet<Entry<String, Integer>>> nGramMap = nExtracter.getNGrams(text);
 		SortedSet<Entry<String, Integer>> bigrams = nGramMap.get("bi");
 		for (Entry<String, Integer> entry : bigrams) {

@@ -102,7 +102,7 @@ public class HTMLHelper {
 		Set<Element> htmlElements =  new LinkedHashSet<Element>();
 		int beg = largestElemIndex, end = largestElemIndex, negNullCounter = 0, posNullCounter = 0,index = 0;
 		while(negNullCounter<=CLUSTER_DISTANCE || posNullCounter<=CLUSTER_DISTANCE){
-			if (largestElemIndex>0 && negNullCounter<CLUSTER_DISTANCE && (largestElemIndex-index)>-1 && elementsOfInterest.get(largestElemIndex-index)!=null) {
+			if (largestElemIndex>0 && negNullCounter<CLUSTER_DISTANCE && (largestElemIndex-index)>0 && elementsOfInterest.get(largestElemIndex-index)!=null) {
 				beg--;
 			}
 			else {
@@ -200,6 +200,7 @@ public class HTMLHelper {
 		}
 		for (int i =0; i<sizeOfMap;i++) { 
 			if (sizeMap.get(i)<Math.min(DEFAULT_RATIO, threasholdRatio)) {
+			//if (sizeMap.get(i)<DEFAULT_RATIO) {
 				mainElements.set(i, null);
 			}
 		}
