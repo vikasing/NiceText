@@ -1,0 +1,55 @@
+This is the official blog of RubyMotion, a toolchain for iOS and OS X development that lets do you do iPhone, iPad and Mac apps in Ruby.
+Follow us on Twitter to stay tuned with everything that's happening in the community!
+At HipByte we thrive to provide a mobile platform that developers can use to write full-fledged, rock-solid apps while being as productive as possible. We have an ambitious, long-term vision for RubyMotion and great features in the pipeline for this year.
+In making it possible for you to use Ruby to write great iOS applications, we were faced with a number of constraints imposed by limitations of the iOS runtime. As a result, when we launched RubyMotion there were a number of edge cases that developers had to be careful about in order to avoid leaking memory or running into memory related crashes.
+As part of our efforts to constantly improve RubyMotion and provide the best possible platform for iOS development, we are happy to announce RubyMotion 2.5 which should resolve a large number of these edge cases. The end result is that you can now build your iOS apps with the confidence that they will work right the first time and won’t waste resources.
+Blocks in Ruby are everywhere. Blocks can be created on the fly, for example for a method iterator callback, or transformed into a object of the , for later use. Variables defined in a block can refer to local variables and change their content; we call them dynamic variables.
+The initial implementation of blocks in RubyMotion came from MacRuby, a project we created several years ago. The main idea behind the implementation was to map dynamic variables as pointers to the stack, and automatically relocate them into heap memory when the block would escape the scope of the current method. Also, because the Objective-C garbage collector had a slow memory allocator, we were heavily caching the block structures, which made invalidating dynamic variables later harder and also recursively calling into existing blocks.
+RubyMotion shipped with this implementation and presented right away an important limitation; block variables, including , would not be retained by the block structure. Calling a block that escaped the scope of the method it was created from would cause a crash if it was using a dynamic variable. The known workaround was to use instance variables instead, which always created a strong reference.
+Now this is history. As of RubyMotion 2.5, blocks have been completely rewritten. Dynamic variables are always allocated as heap memory and the block keeps a strong reference to all of them, including . The block data structure and the class are now internally the same data structure, an object that is properly reclaimed by the iOS runtime when no longer used. Blocks created on the fly are not cached anymore. Local (non-dynamic) variables are still allocated on the stack and potentially optimized into registers.
+def sum(x, y)
+  lambda { x + y } # `x' and `y' are now hosted inside the Proc object.
+end
+
+sum.call(40, 2)
+Another major issue is that passing a object to an iOS API expecting a C-level block would cause the object to leak. It was due to the fact that the C-level blocks created by the runtime would keep a strong reference to the object and never be destroyed.
+As of RubyMotion 2.5, C-level blocks are now created by the compiler on the stack. They do not keep a strong reference to the object, and they implement the copy/dispose helpers as defined in the Blocks specification to properly transfer the ownership of the object when needed.
+class MyObserver
+  def initialize
+    @obs = {}
+  end
+
+  def register(name, &b)
+    @obs[name] = NSNotificationCenter.defaultCenter.addObserverForName(name,
+        object:nil, queue:nil, usingBlock:b)
+    # `b' is now retained.
+  end
+
+  def unregister(name)
+    NSNotificationCenter.defaultCenter.removeObserver(@obs.delete(name))
+    # `b' is now released.
+  end
+end
+RubyMotion exclusively relies on the existing retain-count-based memory management system implemented in the iOS runtime. It is the exact same mechanism used by Objective-C applications. Each object starts with a retain count of 1, and its value is properly incremented and decremented when a reference to it is created and destroyed.
+The main problem with this system is that cyclic references are possible. A cyclic reference is a set of objects where the last object references the first.
+Objects that are part of a cyclic reference graph are never released and leak memory. Detecting and debugging cyclic references in code can also be a challenging task, especially when the graph is large. Ruby, as a very expressive programming language, also makes it quite easy to create cyclic references.
+The RubyMotion runtime has been improved to detect and break basic cyclic references. We implemented a simple algorithm that should be able to handle most circular references present in real-world apps, without introducing a significant performance or memory usage penalty.
+# An example of a cyclic reference now detected by the runtime.
+# MyController -> Array (@events) -> Proc (self) -> MyController
+
+class MyController < UIViewController
+  def action
+    register_event { do_something }
+  end
+
+  def register_event(&b)
+    (@events ||= []) << b
+  end
+end
+In order to preserve acceptable performance, we added limitations to the cycle detector. Only objects instantiated from Ruby classes are scanned for cyclic references. An object is only scanned for cycles when the autorelease pool it was created from is drained. The runtime will not keep track of the object after that point. Only , and objects present in the graph are visited. For performance reasons, we limited the number of iterations; a cyclic reference containing more than 20 objects will not be released.
+The cycle detector is enabled by default in RubyMotion 2.5. We ran the test suite of pretty much every RubyMotion project and library we could find and did not identify any problem. We also seeded the build to some of our developers who reported very positive feedback. However, in the event that your app doesn’t work anymore due to the cycle detector, you can disable it by setting the ARR_CYCLES_DISABLE environment variable to any value.
+Your app will eventually crash. It has to be expected. What’s important is to properly investigate the cause of the crash and make sure it doesn’t happen anymore. We took the opportunity to improve the crash reporting story in RubyMotion 2.5.
+The Exception class is now a subclass of NSException and properly implements its builtin methods, such as , reason, callStackReturnAddresses and callStackSymbols (simulator only). Thanks to this change, crash reporting tools can now analyze crashes from RubyMotion apps due to uncaught exceptions without any additional logic.
+We also removed unnecessary exception handlers created by the build system and the runtime so that an uncaught exception will crash the process as naturally as possible.
+Finally, we introduced the rake crashlog task that you can use to open the latest crash report file that was generated by the system.
+Thanks to these changes, RubyMotion apps should now be more solid and use less resources. We hope that you will enjoy these changes. We would also like to thank Joe Noon (Localini) and Matt Massicotte (Crashlytics) for their help during the development of this release.

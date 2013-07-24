@@ -1,0 +1,4 @@
+In reality, this script is just a glorified alias of python -c, but importing the math library makes this command considerably more powerful.
+This wildcard import gives access to constants such as and in calculations, but more notably, it also allows for the use of functions in calculations. For example:
+Because qc is executed in bash, it requires quotes (single or double) to be placed around expressions with functions, since bash will try to evaluate expressions in parentheses before it does anything else. The quotes tell bash to pass the entire expression as a whole it to instead of trying to evaluate part of it beforehand.
+Finally, once you have the result of a calculation, the pbcopy command places the result in the clipboard for ease of use.

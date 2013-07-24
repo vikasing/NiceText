@@ -3,6 +3,10 @@
  */
 package com.vikasing.nicetext;
 
+import java.util.Set;
+
+import org.crow.utils.HtmlUtils;
+
 
 /**
  * @author vikasing
@@ -15,9 +19,14 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getText("http://reviews.cnet.com/smartphones/htc-one-mini/4505-6452_7-35822951.html").getNiceText();
-		System.out.println(text);
-		
+
+		HtmlUtils htmlUtils = new HtmlUtils();
+		Set<String> urlSet = htmlUtils.getURLsFromHTML("https://news.ycombinator.com/news");
+		for (String url : urlSet) {
+			System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			String text = htmlHelper.getText(url).getNiceText();
+			System.out.println(text);
+		}
 /*		NGramExtracter nExtracter = new NGramExtracter();
 		Map<String, SortedSet<Entry<String, Integer>>> nGramMap = nExtracter.getNGrams(text);
 		SortedSet<Entry<String, Integer>> bigrams = nGramMap.get("bi");

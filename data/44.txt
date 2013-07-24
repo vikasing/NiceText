@@ -1,0 +1,22 @@
+The NSA is a "supercomputing powerhouse" with machines so powerful their speed is measured in thousands of trillions of operations per second. The agency turns its giant machine brains to the task of sifting through unimaginably large troves of data its surveillance programs capture. 
+But ask the NSA, as part of a freedom of information request, to do a seemingly simple search of its own employees' email? The agency says it doesn’t have the technology.
+"There's no central method to search an email at this time with the way our records are set up, unfortunately," NSA Freedom of Information Act officer Cindy Blacker told me last week.
+I filed a request last week for emails between NSA employees and employees of the National Geographic Channel over a specific time period. The TV station had aired a friendly documentary on the NSA and I want to better understand the agency's public-relations efforts.
+A few days after filing the request, Blacker called, asking me to narrow my request since the FOIA office can search emails only “person by person," rather than in bulk. The NSA has more than 30,000 employees.
+I reached out to the NSA press office seeking more information but got no response.
+It’s actually common for large corporations to do bulk searches of their employees email as part of internal investigations or legal discovery.
+“It’s just baffling,” says Mark Caramanica of the Reporters Committee for Freedom of the Press. “This is an agency that’s charged with monitoring millions of communications globally and they can’t even track their own internal communications in response to a FOIA request.”
+Federal agencies’ public records offices are often underfunded, according to Lucy Dalglish, dean of the journalism school at University of Maryland and a longtime observer of FOIA issues.
+But, Daglish says, “If anybody is going to have the money to engage in evaluation of digital information, it’s the NSA for heaven’s sake.”
+For more on the NSA, read our story on the agency’s tapping of Internet cables, our fact-check on claims about the NSA and Sept. 11, and our timeline of surveillance law.
+It’s only baffling if one assumes they haven’t designed the system this way on purpose.
+Standard practice for companies that want to serve pro-privacy customers is to not keep logs.  With logs regularly deleted, there’s nothing in them a search warrant can turn up.
+It’s also standard practice when abusing one’s powers to make sure those powers can’t be turned on you.
+So how do you foil Freedom of Information Act requests, if that’s your interest?  You make it extremely difficult to find and centralize the information people would request.  No information, no scrutiny.
+Security through obscurity, although this definitely is a show-stopper for any FOIA requests. You are authorized to go through the haystack but only at the rate of one piece of straw per week/month/year. Good luck finding that needle. You won’t live that long.
+If you deal with a LOT of “classified” information (because you’re the NSA or a business protecting what could be called “insider information” about your plans/capabilities/flaws), then having a pre-built system to search all of your employees’ emails can be a decided risk.
+It is one thing if an e-intruder cracks an email account and can access all of that account’s “sent” and “inbox” mail…they have to access the email account(s) and the emails on a one-by-one basis, meaning that the intruder “probably” won’t find useful information before it becomes stale…or they are detected.
+But if you have that pre-built search facility in place, then all an e-intruder has to do is access an account with the privileges to use/awareness of that search facility - and your entire entity (business or governmental) becomes the intruder’s playground.
+So me, I don’t find the NSA’s inability to make it easy to search - and thus capture - billions of emails to be disturbing, at all; quite the contrary.
+By the way:  If you see the NSA or another “I” or “A” agency to be a “threat”, then stop electing politicians who prioritize some other interest over “the general Welfare” of the American people and so the safety and security of these United States.
+It takes a totalitarian further up the chain of command to force any “I” or “A” agency to behave like totalitarians.

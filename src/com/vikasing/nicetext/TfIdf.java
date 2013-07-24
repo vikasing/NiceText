@@ -10,10 +10,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jblas.DoubleMatrix;
 
@@ -23,8 +25,10 @@ import org.jblas.DoubleMatrix;
  */
 public class TfIdf {
 	private static final String DATA_DIR = "data";
-	
-	void calculateWordRarity() throws IOException{
+	private static final double ALPHA = 0.4; 
+	private static final double THRESHOLD = 4.5; 
+
+	public void calculateWordRarity() throws IOException{
 		File file = new File(DATA_DIR);
 		File[] files = file.listFiles();
 		// map of all ngrams for all the text combined
@@ -50,7 +54,7 @@ public class TfIdf {
 				NGrams oneDocGrams = nGramExtracter.getNGrams(text);
 				allTextNgMap.putAll(oneDocGrams.getCombinedGramMap());
 				ngramDocMap.put(files[i].getName(),oneDocGrams.getCombinedGramMap());
-				
+
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
@@ -58,10 +62,9 @@ public class TfIdf {
 				in.close();iReader.close();fileStream.close();
 			}
 		}
-				
-		// matrix of (all ngrams) x (total documets)
+
+		// matrix of (all ngrams) x (total documents)
 		double[][] nGramArr = new double[allTextNgMap.size()][totalDocs];
-		//List<String> allGramList = new  ArrayList<String>(allTextNgMap.keySet());
 		String[] allGsArr =  allTextNgMap.keySet().toArray(new String[allTextNgMap.size()]);
 		Set<String> fileNameSet = ngramDocMap.keySet();
 		Map<Integer, String> fileNameMap = new HashMap<Integer, String>();
@@ -71,20 +74,58 @@ public class TfIdf {
 			Map<String, Integer> singleDocNGramMap = ngramDocMap.get(fileName);
 			Set<String> grams = singleDocNGramMap.keySet();
 			for (String gram : grams) {
-				//if (allGramList.contains(gram)) {
 				nGramArr[Arrays.binarySearch(allGsArr, gram)][i] = singleDocNGramMap.get(gram);
-				//}
 			}
 			i++;
 		}
 		Map<String, Map<String, Double>> keywordMap = calculateTFIDF(nGramArr, allGsArr, fileNameMap);		
 		for (String fileName : keywordMap.keySet()) {
 			System.out.println("===========================keywords for "+fileName+"=============================================");
-			for (String keyword : keywordMap.get(fileName).keySet()) {
+			Set<String> kewordSet = new TreeSet<String>(keywordMap.get(fileName).keySet());
+			Set<String> gramsToRemove = new HashSet<String>();
+			String[] keywordArr = kewordSet.toArray(new String[kewordSet.size()]);
+			for (int j = 0; j < keywordArr.length; j++) {
+				getOverlapping(gramsToRemove, keywordMap.get(fileName), keywordArr,keywordArr[j]);
+				kewordSet.removeAll(gramsToRemove);
+			}
+			for (String keyword : kewordSet) {
 				System.out.println(keyword +" "+ keywordMap.get(fileName).get(keyword));
 			}
 		}
 	}
+	/**
+	 * @param gramsToRemove
+	 * @param keywordArr
+	 * @param firstBi
+	 */
+	private void getOverlapping(Set<String> gramsToRemove, Map<String, Double> gramMap, String[] keywordArr, String word) {		
+		String[] tempArr = word.split(" ");
+		if (tempArr.length>2) {
+			searchArray(gramsToRemove, gramMap, keywordArr, word, tempArr[0]+" "+tempArr[1]);
+			searchArray(gramsToRemove, gramMap, keywordArr, word, tempArr[1]+" "+tempArr[2]);
+		}
+		else if (tempArr.length>1) {
+			for (int k = 0; k < tempArr.length; k++) {
+				searchArray(gramsToRemove, gramMap, keywordArr, word, tempArr[k]);
+			}
+		}
+	}
+	/**
+	 * @param gramsToRemove
+	 * @param gramMap
+	 * @param keywordArr
+	 * @param word
+	 * @param tempArr
+	 * @param k
+	 */
+	private void searchArray(Set<String> gramsToRemove,Map<String, Double> gramMap, String[] keywordArr, String word,String tempWord) {
+		int pos = Arrays.binarySearch(keywordArr,tempWord);
+		if (pos>-1) {// && (gramMap.get(tempWord).compareTo(gramMap.get(word))==0)) {
+			gramsToRemove.add(keywordArr[pos]);
+		}
+	}
+	
+	
 	/**
 	 * @param bigArr
 	 * @param allGs
@@ -116,11 +157,11 @@ public class TfIdf {
 			}			
 			for (int k = 0; k < numOfDocs; k++) {
 				if (bigArr[j][k]!=0) {
-					//double tf = Math.log(bigArr[j][k]+1);
+					double tf = Math.log(bigArr[j][k]+1);
 					//double tf = bigArr[j][k];
-					double tf = 0.4 + (0.6*bigArr[j][k])/(double)maxFreqMap.get(k);
+					//double tf = ALPHA + ((1-ALPHA)*bigArr[j][k])/(double)maxFreqMap.get(k);
 					double idf = Math.log((double)numOfDocs/counter);
-					if (tf*idf>1.8) {
+					if (tf*idf>THRESHOLD) {
 						if (keywordMap.containsKey(fileNameMap.get(k))) {
 							keywordMap.get(fileNameMap.get(k)).put(allGs[j],tf*idf);
 						}

@@ -1,0 +1,6 @@
+What is this? This map shows monthly average temperatures recorded by approximately 7,280 climate stations around the world since 1900. Our goal was to show the beauty in the diversity of land temperatures, rather than to provide a precise weather map. Read more about our motivation on our blog post.
+Mapping approach Temperature measurements are taken at specific geographic locations. We used a Voronoi tessellation to turn these points into colored regions on the map. This method is not always precise, but gives a fairly good approximation, especially in areas where weather stations are close to each other.
+Data source Monthly mean temperature, used for NCDC climate monitoring activities, including calculation of global land surface temperature anomalies and trends. NOAA NCDC - GHCN Monthly
+Click anywhere on map to toggle the hidden terrain layer.
+Hey there. It looks like you're on a mobile device. Just a quick warning: This project will download a lot of data from the interwebs (no really!), and even then it probably won't look that great.
+Your best bet is to bookmark this page, go home, check it out on your desktop, and see it in its full glory.

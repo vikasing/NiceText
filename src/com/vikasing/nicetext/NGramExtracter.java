@@ -3,13 +3,8 @@
  */
 package com.vikasing.nicetext;
 
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * @author vikasing
@@ -45,17 +40,17 @@ public class NGramExtracter {
 		Map<String, Integer> biGramMap = new TreeMap<String, Integer>();
 		Map<String, Integer> triGramMap = new TreeMap<String, Integer>();
 		Map<String, Integer> combinedGramMap = new TreeMap<String, Integer>();
-		text=text.trim();
-		/*		
-		 * Uncomment/comment if you want to remove/not remove the special chars from the text.
-		 */
+
 		text = text.toLowerCase().trim();
+		text = text.replaceAll("[^a-zA-Z0-9]+"," ");
+
+		//System.out.println(text);
 		for (int j = 0; j < stopWords.length; j++) {
 			if (text.contains(stopWords[j])) {
 				text=text.replaceAll("\\b"+stopWords[j]+"\\b", "");
 			}	
 		}
-		text = text.replaceAll("[^a-zA-Z 0-9]+"," ");
+		//System.out.println(text);
 		text = text.replaceAll(" +", " ");
 		String[] words = text.split(" ");
 		String nGram =null;

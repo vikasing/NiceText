@@ -1,0 +1,40 @@
+This is a function invocation. A function invocation comprises a list where the first element is the function and the rest of the elements are the arguments. takes one argument, , and returns .
+This is a lambda, which is a function definition. The function takes a parameter, , and just returns it.
+This is a lambda invocation. A lambda invocation comprises a list where the first element is a lambda and the rest of the elements are the arguments. The lambda takes one argument, "Lisp", and returns it.
+The code for Little Lisp has two parts: the parser and the interpreter.
+Parsing has two phases: tokenizing and parenthesizing.
+tokenize() takes a string of Lisp code, puts spaces around every parenthesis and splits on whitespace. For example, it takes something like ((lambda (x) x) "Lisp"), transforms it into ( ( lambda ( x ) x ) "Lisp" ) and transforms that into ['(', '(', 'lambda', '(', 'x', ')', 'x', ')', '"Lisp"', ')'].
+parenthesize() takes the tokens produced by tokenize() and produces a nested array that mimics the structure of the Lisp code. Each atom in the nested array is labelled as an identifier or a literal. For example, ['(', '(', 'lambda', '(', 'x', ')', 'x', ')', '"Lisp"', ')'] is transformed into:
+parenthesize() goes through the tokens, one by one. If the current token is an opening parenthesis, it starts building a new array. If the current token is an atom, it labels it with its type and appends it to the current array. If the current token is a closing parenthesis, it stops building the current array and continues building the enclosing array.
+When parenthesize() is first called, the parameter contains the array of tokens returned by tokenize(). For example:
+When parenthesize() is first called, the parameter is undefined. Lines 2-3 run and parenthesize() recurses with set to an empty array.
+In the recursion, line 5 runs and removes the first opening parenthesis from . Line 9 starts a new, empty list by recursing with a new, empty array.
+In the recursion, line 5 runs and removes another opening parenthesis from . Line 9 starts another new, empty list by recursing with another new, empty array.
+In the recursion, is ['lambda', '(', 'x', ')', 'x', ')', '"Lisp"', ')']. Line 14 runs with set to lambda. It calls categorize() and passes lambda as the argument. Line 7 of categorize() runs and returns an object with set to identifier and set to lambda.
+Line 14 of parenthesize() appends to the object returned by categorize() and recurses with the rest of the input and .
+In the recursion, the next token is a parenthesis. Line 9 of parenthesize() starts a new, empty list by recursing with an empty array. In the recursion, is ['x', ')', 'x', ')', '"Lisp"', ')']. Line 14 runs with set to . It makes a new object with a value of and a type of identifier. It appends this object to and recurses.
+In the recursion, the next token is a closing parenthesis. Line 12 runs and returns the completed : [{ type: 'identifier', value: 'x' }].
+parenthesize() continues recursing until it has processed all of the input tokens. It returns the nested array of typed atoms.
+Given a starting input of ((lambda (x) x) "Lisp"), the final output of the parser is:
+interpret() receives the output of parse() and executes it. Given the output from the parsing example above, interpret() would construct a lambda and invoke it with the argument "Lisp". The lambda invocation would return "Lisp", which would be the output of the whole program.
+As well as the input to execute, interpret() receives an execution context. This is the place where variables and their values are stored. When a piece of Lisp code is executed by interpret(), the execution context contains the variables that are accessible to that code.
+These variables are stored in a hierarchy. Variables in the current scope are at the bottom of the hierarchy. Variables in the enclosing scope are in the level above. Variables in the scope enclosing the enclosing scope are in the level above that. And so on. For example, in the following code:
+On line 3, the execution context has two active scopes. The inner lambda forms the current scope. The outer lambda forms an enclosing scope. The current scope has bound to . The enclosing scope has bound to . When line 3 runs, the interpreter tries to look up in the context. It checks the current scope, finds and returns its value. Still on line 3, the interpreter tries to look up . It checks the current scope and does not find , so it tries the enclosing scope. There, it finds and returns its value.
+In Little Lisp, the execution context is modeled with an object made by calling the Context constructor. This takes , an object that contains variables and their values in the current scope. And it takes parent. If parent is undefined, the scope is the top, or global scope.
+We have seen how ((lambda (x) x) "Lisp") gets parsed. Let us see how the parsed code gets executed.
+The first time interpret() is called, context is undefined. Lines 2-3 are run to make an execution context.
+When the initial context is instantiated, the constructor function takes the library object. This contains the functions built in to the language: , and . These functions are written in JavaScript.
+contains the full example output from the parsing section:
+Because is an array and context is defined, lines 4-5 are run and interpretList() is called.
+In interpretList(), line 5 maps over the input array and calls interpret() on each element. When interpret() is called on the lambda definition, interpretList() gets called again. This time, the argument to interpretList() is:
+Line 3 of interpretList() gets called, because lambda, the first element in the array, is a special form. special.lambda() is called to create the lambda function.
+special.lambda() takes the part of the input that defines the lambda. It returns a function that, when invoked, invokes the lambda on some arguments.
+Line 3 begins the definition of the lambda invocation function. Line 4 stores the arguments passed to the lambda invocation. Line 5 starts creating a new scope for the lambda's invocation. It reduces over the part of the input that defines the parameters of the lambda: [{ type: 'identifier', value: 'x' }]. It adds a key/value pair to the lambda scope for each lambda parameter in and argument passed to the lambda. Line 10 invokes the lambda by calling interpret() on the lambda body: { type: 'identifier', value: 'x' }. It passes in the lambda context that contains the lambda's scope and the parent context.
+The lambda is now represented by the function returned by special.lambda().
+interpretList() continues mapping over the array by calling interpret() on the second element of the list: the "Lisp" string.
+This runs line 9 of interpret() which just returns the attribute of the literal object: 'Lisp'. The map operation on line 5 of interpretList() is complete. is:
+Line 6 of interpretList() runs and finds that the first element of is a JavaScript function. This means that the list is an invocation. Line 7 runs and invokes the lambda, passing the rest of as arguments.
+In the lambda invocation function, line 8 calls interpret() on the lambda body, { type: 'identifier', value: 'x' }.
+Line 6 of interpret() finds that is an identifier atom. Line 7 looks up the identifier, , in context and returns 'Lisp'.
+'Lisp' is returned by the lambda invocation function, which is returned by interpretList(), which is returned by interpret(), and that's it.
+Go to the GitHub repository to see all the code. And look at lis.py, the dazzlingly simple Scheme interpreter that Peter Norvig wrote in Python.
