@@ -3,7 +3,6 @@
  */
 package com.vikasing.nicetext;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -26,7 +24,6 @@ import org.jsoup.select.NodeVisitor;
  *
  */
 public class HTMLHelper {
-	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0";
     private static final Pattern POSSIBLE_TEXT_NODES = Pattern.compile("p|div|td|h1|h2|h3|article|section|span|tmp|li|font|em");
     private static final String[] UNWRAP_TAGS = {"b","u","i","font","em"};
     //private static final Pattern ARTICLE_NODES = Pattern.compile("article|section|tmp");
@@ -40,7 +37,7 @@ public class HTMLHelper {
 	private static final double DEFAULT_RATIO = 0.1;
 	private NiceTextType niceTextType;
 	private int largestElemIndex = 0;
-	
+	private int numOfURLs;
 	public HTMLHelper(){
 		niceTextType = new NiceTextType();
 	}
@@ -50,14 +47,14 @@ public class HTMLHelper {
 		//System.out.println(niceTextType.getArticleText());
 	}
 	*/
-	public NiceTextType getText(String url){
-		try {
-			Document document = Jsoup.connect(url).timeout(60000).userAgent(USER_AGENT).get();
-			//Document document = Jsoup.parse(new File("art.html"), "UTF-8");
-			Element bodyElement = removeFat(document.body());
-			//System.out.println(bodyElement);
-			//articleFinder(bodyElement);
-			Elements flattenElements = new Elements(flattenDOM(bodyElement));
+	public NiceTextType getText(Document document){
+		//Document document = Jsoup.connect(url).timeout(60000).userAgent(USER_AGENT).get();
+		//Document document = Jsoup.parse(new File("art.html"), "UTF-8");
+		Element bodyElement = removeFat(document.body());
+		//System.out.println(bodyElement);
+		//articleFinder(bodyElement);
+		Elements flattenElements = new Elements(flattenDOM(bodyElement));
+		if (!flattenElements.isEmpty()) {
 			Elements elementsOfInterest = calculateBlockSizeRatios(flattenElements);
 			Set<Element> mainCluster = findMainCluster(elementsOfInterest);
 			Set<Element> largestCluster = null;
@@ -72,28 +69,28 @@ public class HTMLHelper {
 				int textSize = 0;
 				for (Element elem : c) {
 					textSize += elem.text().length();
-				}				
-				if (maxCSize<textSize) {
+				}
+				if (maxCSize < textSize) {
 					maxCSize = textSize;
 					lCluster = c;
-				}			
+				}
 			}
-			if (maxCSize>=mainClusterTextSize) {
+			if (maxCSize >= mainClusterTextSize) {
 				largestCluster = lCluster;
-			}
-			else {
+			} else {
 				largestCluster = mainCluster;
 			}
-			StringBuffer niceTextBuffer = new StringBuffer();
-			for (Element element : largestCluster) {
-				niceTextBuffer.append(element.text()+"\n");
+			if (largestCluster != null) {
+				StringBuffer niceTextBuffer = new StringBuffer();
+				for (Element element : largestCluster) {
+					niceTextBuffer.append(element.text() + "\n");
+				}
+				niceTextType.setNiceText(niceTextBuffer.toString());
 			}
-			niceTextType.setNiceText(niceTextBuffer.toString());
 			//niceTextType.setLargestTextBlock(blockBuffer.toString());
+			//System.out.println("no of URLs: " + (double) numOfURLs/ (double) bodyElement.text().length());
 			niceTextType.setAllText(bodyElement.text());
 			niceTextType.setPageTitle(document.title());
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return niceTextType;
 	}
@@ -155,7 +152,8 @@ public class HTMLHelper {
 				nullCounter = 0;
 			}
 		}
-		if (clusters.size()==0) {
+		// below condition handles the case when there is only one cluster without any null elements, e.g. first big chunk of the text
+		if (clusters.size()==0 && htmlElements!=null) {
 			clusters.add(htmlElements);
 		}		
 		return clusters;
@@ -199,8 +197,8 @@ public class HTMLHelper {
 			sizeMap.put(key, sizeMap.get(key)/k.get(maxIndex));
 		}
 		for (int i =0; i<sizeOfMap;i++) { 
-			if (sizeMap.get(i)<Math.min(DEFAULT_RATIO, threasholdRatio)) {
-			//if (sizeMap.get(i)<DEFAULT_RATIO) {
+			//if (sizeMap.get(i)<Math.min(DEFAULT_RATIO, threasholdRatio)) {
+			if (sizeMap.get(i)<DEFAULT_RATIO) {
 				mainElements.set(i, null);
 			}
 		}
@@ -229,12 +227,15 @@ public class HTMLHelper {
 	private Map<Integer, Double> calculateSize(Elements elements) {
 		Map<Integer, Double> sizeMap = new LinkedHashMap<Integer, Double>();
 		for (int i=0;i< elements.size();i++) {
-			sizeMap.put(i, (double)elements.get(i).ownText().length());
+			sizeMap.put(i, (double)elements.get(i).text().length());
 		}
 		return sizeMap;
 	}
 	
     private Element removeFat(Element doc) {
+    	
+    	this.numOfURLs = doc.getElementsByTag("a").size();
+    	
     	for (int i = 0; i < UNWRAP_TAGS.length; i++) {
         	doc.select(UNWRAP_TAGS[i]).unwrap();
 		}

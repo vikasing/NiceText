@@ -3,9 +3,8 @@
  */
 package com.vikasing.nicetext;
 
-import java.util.Set;
 
-import org.crow.utils.HtmlUtils;
+//import org.crow.utils.HtmlUtils;
 
 
 /**
@@ -18,16 +17,16 @@ public class Test {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		HTMLHelper htmlHelper = new HTMLHelper();
+		NiceText niceText = new NiceText();
 
-		HtmlUtils htmlUtils = new HtmlUtils();
-/*		Set<String> urlSet = htmlUtils.getURLsFromHTML("https://news.ycombinator.com/news");
+		/*HtmlUtils htmlUtils = new HtmlUtils();
+		Set<String> urlSet = htmlUtils.getURLsFromHTML("https://news.ycombinator.com/news");
 		for (String url : urlSet) {
 			System.out.println(url+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 			String text = htmlHelper.getText(url).getNiceText();
 			System.out.println(text);
 		}*/
-		String text = htmlHelper.getText("http://autos.yahoo.com/news/lamborghini-dynavonto-more-sophisticated-approach-130415871.html").getNiceText();
+		String text = niceText.getNiceText("http://techcrunch.com/2013/06/24/google-launches-cloud-playground-a-browser-based-environment-for-trying-its-cloud-platform/").getNiceText();
 		System.out.println(text);
 		/*
 		NGramExtracter nExtracter = new NGramExtracter();

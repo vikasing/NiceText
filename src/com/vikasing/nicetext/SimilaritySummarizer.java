@@ -14,8 +14,8 @@ public class SimilaritySummarizer extends Summarize {
 	 */
 	@Override
 	public String summarizeText() {
-		HTMLHelper htmlHelper = new HTMLHelper();
-		String text = htmlHelper.getText("http://techcrunch.com/2013/06/24/google-launches-cloud-playground-a-browser-based-environment-for-trying-its-cloud-platform/").getNiceText();
+		NiceText niceText = new NiceText();
+		String text = niceText.getNiceText("http://techcrunch.com/2013/06/24/google-launches-cloud-playground-a-browser-based-environment-for-trying-its-cloud-platform/").getNiceText();
 		System.out.println(text);
 		String[] textA = text.split("\\.");
 		StringBuffer summBuffer = new StringBuffer();
