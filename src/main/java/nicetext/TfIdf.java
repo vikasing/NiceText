@@ -1,88 +1,46 @@
-/**
- * 
- */
-package com.vikasing.nicetext;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+package nicetext;/*
+package nicetext;
 
 import org.jblas.DoubleMatrix;
 
+import java.util.HashMap;
+
+import java.io.*;
+import java.util.*;
+
+*/
 /**
  * @author vikasing
  *
- */
+ *//*
+
+
 public class TfIdf {
-	private static final String DATA_DIR = "data";
-	private static final double ALPHA = 0.4; 
+	private static final double ALPHA = 0.4;
 	private static final double THRESHOLD = 4.5; 
 
-	public void calculateWordRarity() throws IOException{
-		File file = new File(DATA_DIR);
-		File[] files = file.listFiles();
-		// map of all ngrams for all the text combined
-		Map<String, Integer> allTextNgMap = new TreeMap<String,Integer>();
-		Map<String, Map<String, Integer>> ngramDocMap = new HashMap<String, Map<String,Integer>>();
-		NGramExtracter nGramExtracter = new NGramExtracter();
-		int totalDocs = files.length;
+	public void calculateWordRarity(Set<String> docs) throws IOException {
 
-		for (int i = 0; i < totalDocs; i++) {
-			FileInputStream fileStream = null;
-			InputStreamReader iReader = null;
-			BufferedReader in = null;
-			try {
-				fileStream = new FileInputStream(files[i]);
-				iReader = new InputStreamReader(fileStream);
-				in = new BufferedReader(iReader);
-				String xString = null;
-				StringBuffer stringBuffer = new StringBuffer();
-				while ((xString=in.readLine())!=null) {
-					stringBuffer.append(xString+" ");
-				}
-				String text = stringBuffer.toString();
-				NGrams oneDocGrams = nGramExtracter.getNGrams(text);
-				allTextNgMap.putAll(oneDocGrams.getCombinedGramMap());
-				ngramDocMap.put(files[i].getName(),oneDocGrams.getCombinedGramMap());
-
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-			finally {
-				in.close();iReader.close();fileStream.close();
-			}
-		}
-
-		// matrix of (all ngrams) x (total documents)
-		double[][] nGramArr = new double[allTextNgMap.size()][totalDocs];
+        // matrix of (all ngrams) x (total documents)
+		double[][] nGramMatrix = new double[allTextNgMap.size()][totalDocs];
 		String[] allGsArr =  allTextNgMap.keySet().toArray(new String[allTextNgMap.size()]);
 		Set<String> fileNameSet = ngramDocMap.keySet();
-		Map<Integer, String> fileNameMap = new HashMap<Integer, String>();
+		Map<Integer, String> fileNameMap = new HashMap<>();
 		int i = 0;
 		for (String fileName : fileNameSet) {
 			fileNameMap.put(i, fileName);
 			Map<String, Integer> singleDocNGramMap = ngramDocMap.get(fileName);
 			Set<String> grams = singleDocNGramMap.keySet();
 			for (String gram : grams) {
-				nGramArr[Arrays.binarySearch(allGsArr, gram)][i] = singleDocNGramMap.get(gram);
+				nGramMatrix[Arrays.binarySearch(allGsArr, gram)][i] = singleDocNGramMap.get(gram);
 			}
 			i++;
 		}
-		Map<String, Map<String, Double>> keywordMap = calculateTFIDF(nGramArr, allGsArr, fileNameMap);		
+		Map<String, Map<String, Double>> keywordMap = calculateTFIDF(nGramMatrix, allGsArr, fileNameMap);
 		for (String fileName : keywordMap.keySet()) {
 			System.out.println("===========================keywords for "+fileName+"=============================================");
-			Set<String> kewordSet = new TreeSet<String>(keywordMap.get(fileName).keySet());
-			Set<String> gramsToRemove = new HashSet<String>();
+			Set<String> kewordSet = new TreeSet<>(keywordMap.get(fileName).keySet());
+			Set<String> gramsToRemove = new HashSet<>();
 			String[] keywordArr = kewordSet.toArray(new String[kewordSet.size()]);
 			for (int j = 0; j < keywordArr.length; j++) {
 				getOverlapping(gramsToRemove, keywordMap.get(fileName), keywordArr,keywordArr[j]);
@@ -93,11 +51,14 @@ public class TfIdf {
 			}
 		}
 	}
-	/**
-	 * @param gramsToRemove
-	 * @param keywordArr
-	 * @param firstBi
-	 */
+*/
+/**
+ * @param gramsToRemove
+ * @param keywordArr
+ *//*
+
+
+
 	private void getOverlapping(Set<String> gramsToRemove, Map<String, Double> gramMap, String[] keywordArr, String word) {		
 		String[] tempArr = word.split(" ");
 		if (tempArr.length>2) {
@@ -110,14 +71,8 @@ public class TfIdf {
 			}
 		}
 	}
-	/**
-	 * @param gramsToRemove
-	 * @param gramMap
-	 * @param keywordArr
-	 * @param word
-	 * @param tempArr
-	 * @param k
-	 */
+
+
 	private void searchArray(Set<String> gramsToRemove,Map<String, Double> gramMap, String[] keywordArr, String word,String tempWord) {
 		int pos = Arrays.binarySearch(keywordArr,tempWord);
 		if (pos>-1) {// && (gramMap.get(tempWord).compareTo(gramMap.get(word))==0)) {
@@ -125,17 +80,12 @@ public class TfIdf {
 		}
 	}
 	
-	
-	/**
-	 * @param bigArr
-	 * @param allGs
-	 * @param fileNameMap 
-	 */
+
 	private Map<String, Map<String, Double>> calculateTFIDF(double[][] bigArr, String[] allGs, Map<Integer, String> fileNameMap) {
 		DoubleMatrix doubleMatrix = new DoubleMatrix(bigArr);
 		int columns = doubleMatrix.columns;
-		Map<String, Map<String, Double>> keywordMap = new HashMap<String, Map<String, Double>>();
-		Map<Integer, Integer> maxFreqMap = new LinkedHashMap<Integer, Integer>();
+		Map<String, Map<String, Double>> keywordMap = new HashMap<>();
+		Map<Integer, Integer> maxFreqMap = new LinkedHashMap<>();
 		for (int i = 0; i < columns; i++) {
 			DoubleMatrix aColumn = doubleMatrix.getColumn(i);
 			int maxFrequency = 0;
@@ -166,7 +116,7 @@ public class TfIdf {
 							keywordMap.get(fileNameMap.get(k)).put(allGs[j],tf*idf);
 						}
 						else {
-							Map<String, Double> keywordScoreMap= new HashMap<String, Double>();
+							Map<String, Double> keywordScoreMap= new HashMap<>();
 							keywordScoreMap.put(allGs[j],tf*idf);
 							keywordMap.put(fileNameMap.get(k), keywordScoreMap);
 						}
@@ -181,3 +131,4 @@ public class TfIdf {
 		tfIdf.calculateWordRarity();
 	}
 }
+*/

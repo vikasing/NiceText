@@ -1,13 +1,11 @@
 /**
  *
  */
-package com.vikasing.nicetext;
+package nicetext;
 
 
 //import crow.utils.WebUtils;
 
-
-import crow.global.G;
 
 /**
  * @author vikasing
@@ -18,7 +16,6 @@ public class TestNiceText {
      * @param args
      */
     public static void main(String[] args) {
-        G.init();
         /*WebUtils htmlUtils = new WebUtils();
 		Set<String> urlSet = htmlUtils.getLinksFromWebPage("https://news.ycombinator.com/news");
 		for (String url : urlSet) {
@@ -26,11 +23,11 @@ public class TestNiceText {
 			String text = htmlHelper.getText(url).get();
 			System.out.println(text);
 		}*/
-
+        NiceText niceText = new NTImpl();
         String[] urls = new String[]{
+                "http://www.scientificamerican.com/article/common-parasite-could-manipulate-our-behavior/",
                 "http://www.npr.org/2015/03/27/395593337/twist-of-fate-an-accident-brings-beautiful-symmetry-to-two-lives",
                 "http://www.oneindia.com/sports/cricket/bangladesh-captain-speaks-on-aleem-dar-s-no-ball-error-at-world-cup-1689394.html",
-                "http://www.independent.co.uk/news/world/middle-east/isis-in-libya-muammar-gaddafis-soldiers-are-back-in-the-country-and-fighting-under-the-black-flag-of-the-islamic-state-10111964.html",
                 "http://www.chinadaily.com.cn/business/2015-03/20/content_19862174.htm",
                 "http://www.vox.com/2015/3/16/8225977/dick-vitale-talking",
                 "http://economictimes.indiatimes.com/news/politics-and-nation/supreme-court-extends-interim-bail-to-teesta-setalvad-and-husband-javed-anand/articleshow/46628427.cms",
@@ -45,8 +42,6 @@ public class TestNiceText {
                 "http://www.aninews.in/newsdetail2/story203457/will-bounce-back-after-two-three-years-congress.html",
                 "http://edition.cnn.com/2015/03/10/world/afghanistan-violence/index.html",
                 "http://economictimes.indiatimes.com/news/politics-and-nation/membership-drive-bjp-turns-to-mps-mlas-for-final-push-to-make-it-worlds-largest-party/articleshow/46449753.cms",
-                "http://www.independent.co.uk/sport/cricket/ecb-proposes-end-of-the-fiveday-cricket-test-match-10071057.html",
-                "http://www.independent.co.uk/news/business/news/private-equity-driver-gears-up-for-auto-trader-flotation-10074117.html",
                 "http://www.thehindu.com/news/national/andhra-pradesh/tap-aquaculture-potential-to-full/article6943174.ece?homepage=true",
                 "http://www.denverpost.com/ci_27602128/charles-koch-working-business-book-scheduled-october",
                 "http://www.irishtimes.com/news/world/secretive-bilderberg-group-sets-sights-on-michael-o-leary-1.2119343",
@@ -59,7 +54,7 @@ public class TestNiceText {
                 "http://www.deccanherald.com/content/458482/karnataka-man-seen-cctv-footage.html",
         };
         for (String url : urls) {
-            String[] t = NTFactory.getNiceText(url).split("\n");
+            String[] t = niceText.extract(url).split("\n");
             StringBuilder txtB = new StringBuilder();
             for (String s : t) {
                 s = s.trim();

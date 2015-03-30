@@ -1,4 +1,4 @@
-package com.vikasing.nicetext;
+package nicetext;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,13 +22,8 @@ public class NTHelper {
     private static final int CL_DIST = 4;
     private static final int WORDS_T = 5;
     private static final double DEFAULT_RATIO = 0.1;
-    private NiceText niceText;
 
-    public NTHelper() {
-        niceText = new NiceText();
-    }
-
-    public NiceText getText(Document document) {
+    public String getText(Document document) {
         removeFat(document);
         Element bodyElement = document.body();
         Element articleE = articleFinder(bodyElement);
@@ -41,8 +36,7 @@ public class NTHelper {
         if (text.length() < 500) {
             text = getText(bodyElement);
         }
-        niceText.setNiceText(text);
-        return niceText;
+        return text;
     }
 
     private String getText(Element bodyElement) {
