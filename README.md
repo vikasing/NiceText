@@ -1,7 +1,7 @@
 # NiceText
-NiceText removes HTML Clutter from a Web Page, it tries to find out the concentration of the text on a wep page and uses heuristics to determine the main block of the text.
+NiceText removes HTML Clutter from a Web Page, it tries to find out the concentration of the text on a web page and uses heuristics to determine the main block of the text.
 #####Example Usage
-NiceText interface is implemented by NTImpl, it has a method `extract` which takes a URL (`String` type) as parameter, here is a simple usase:
+NiceText interface is implemented by NTImpl, it has a method `extract` which takes a URL (`String` type) as parameter, here is a simple use case:
 
 ```java
 NiceText niceText = new NTImpl();
